@@ -1,0 +1,3668 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vertriebswochenplanung – Jahresauswertung (Team Reuter & Lorenz)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --text:#e8ecff;
+      --muted:#a9b2d6;
+      --line: rgba(255,255,255,.10);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 700px at 10% 0%, #1a2a66 0%, transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, #245b6a 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg), #070a14);
+      color:var(--text);
+      min-height:100vh;
+    }
+    header{ padding: 22px 20px 6px; max-width: 1550px; margin: 0 auto; }
+    h1{ margin: 0 0 6px; font-size: 22px; font-weight: 1000; letter-spacing: .2px; }
+    .sub{ margin:0; color: var(--muted); font-size: 13px; line-height: 1.35; }
+
+    .wrap{
+      max-width: 1550px;
+      margin: 0 auto;
+      padding: 14px 20px 24px;
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .card .hd h2{
+      margin:0;
+      font-size: 13px;
+      letter-spacing:.25px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 1000;
+    }
+    .card .bd{ padding: 14px 16px 16px; }
+
+    .btn{
+      background: rgba(110,168,255,.14);
+      border: 1px solid rgba(110,168,255,.35);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor:pointer;
+      transition: transform .05s ease, background .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      user-select:none;
+      text-decoration:none;
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(110,168,255,.22); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .btn.danger{
+      background: rgba(255,107,107,.16);
+      border: 1px solid rgba(255,107,107,.40);
+    }
+
+    .row{display:flex; gap:10px; align-items:center;}
+    .col{display:flex; flex-direction:column; gap:8px;}
+    .muted{color:var(--muted);}
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 1000;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    input[type="text"], input[type="number"], select{
+      width:100%;
+      background: rgba(10,14,30,.45);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      outline:none;
+      font-size: 14px;
+    }
+    input::placeholder{color: rgba(169,178,214,.65);}
+    label{font-size:12px; color: var(--muted); font-weight:1000; letter-spacing:.2px;}
+
+    .repList{ display:flex; flex-direction:column; gap: 8px; margin-top: 10px; }
+    .repItem{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .repName{
+      font-weight: 1000;
+      font-size: 13px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 230px;
+    }
+    .tiny{ font-size: 12px; padding: 7px 10px; border-radius: 12px; }
+
+    .mainGrid{ display:grid; grid-template-rows: auto auto auto 1fr; gap: 16px; }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:flex-end;
+      justify-content:space-between;
+    }
+    .toolbar .left, .toolbar .right{
+      display:flex;
+      gap: 10px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .kpiGrid{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .kpi{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 12px 12px;
+      min-height: 86px;
+    }
+    .kpi .t{font-size:11px; color: var(--muted); font-weight:1000; text-transform:uppercase; letter-spacing:.25px;}
+    .kpi .v{font-size:18px; font-weight:1000; margin-top:6px;}
+    .kpi .s{font-size:12px; color: var(--muted); margin-top:4px; line-height:1.25;}
+
+    .tableWrap{
+      overflow:auto;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width: 1400px;
+    }
+    thead th{
+      position: sticky;
+      top:0;
+      background: rgba(15,23,49,.92);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      vertical-align: top;
+      text-align:left;
+      font-size: 13px;
+    }
+    th{
+      color: var(--muted);
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .25px;
+      font-size: 11px;
+      white-space:nowrap;
+    }
+    tbody tr:hover td{ background: rgba(110,168,255,.06); }
+
+    td .cellInput{ width: 120px; padding: 8px 10px; border-radius: 12px; font-size: 13px; }
+    td .cellInput.small{ width: 105px; }
+    td .cellInput.money{ width: 155px; }
+    td .cellSelect{ width: 170px; padding: 8px 10px; border-radius: 12px; font-size:13px; }
+
+    .cellName{ font-weight: 1000; white-space:nowrap; }
+    .calc{ font-weight: 1000; white-space:nowrap; }
+    .calc.muted{ color: var(--muted); font-weight:900; }
+
+    .traffic{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight:1000;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px; height:10px; border-radius: 50%;
+      background: rgba(255,255,255,.3);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06) inset;
+      flex:none;
+    }
+    .warn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-top:6px;
+      padding: 5px 8px;
+      border-radius: 10px;
+      border:1px solid rgba(255,204,102,.35);
+      background: rgba(255,204,102,.10);
+      color: rgba(255,204,102,.95);
+      font-weight:1000;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    .note{ font-size:12px; color: var(--muted); line-height: 1.35; }
+
+    .chartsGrid{
+      display:grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap: 16px;
+    }
+    .chartCard canvas{ width:100% !important; height: 300px !important; }
+    .chartCard.small canvas{ height: 300px !important; }
+
+    .rankTable{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+    .rankTable th, .rankTable td{ padding: 8px 8px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 13px; }
+    .rankTable th{ font-size:11px; color: var(--muted); font-weight:1000; text-transform: uppercase; }
+    .rankName{ font-weight:1000; }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+      border-radius: 14px;
+      user-select:none;
+    }
+    .toggle input{ width:auto; }
+
+    .checkItem{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 10px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      margin-bottom: 8px;
+    }
+    .checkLeft{ display:flex; flex-direction:column; gap:2px; min-width: 0; }
+    .checkName{ font-weight:1000; font-size: 13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .checkMeta{ font-size:12px; color: var(--muted); }
+    .badgeOk{
+      padding: 6px 10px; border-radius: 999px; font-weight:1000; font-size:12px;
+      border:1px solid rgba(124,240,199,.35); background: rgba(124,240,199,.10); color: rgba(124,240,199,.95);
+      white-space:nowrap;
+    }
+    .badgeNo{
+      padding: 6px 10px; border-radius: 999px; font-weight:1000; font-size:12px;
+      border:1px solid rgba(255,107,107,.35); background: rgba(255,107,107,.12); color: rgba(255,107,107,.95);
+      white-space:nowrap;
+    }
+
+    @media (max-width: 1250px){
+      .wrap{ grid-template-columns: 1fr; }
+      .kpiGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .chartsGrid{ grid-template-columns: 1fr; }
+      table{ min-width: 1200px; }
+    }
+  
+    .banner{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin: 12px 20px 0;
+      max-width: 1550px;
+      margin-left:auto;
+      margin-right:auto;
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .banner b{font-weight:1000;}
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal{
+      width: min(980px, 96vw);
+      max-height: 88vh;
+      overflow:auto;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(20,28,60,.96), rgba(10,14,30,.96));
+      box-shadow: var(--shadow);
+    }
+    .modal .mhd{
+      position: sticky;
+      top: 0;
+      background: rgba(15,23,49,.95);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      z-index: 1;
+    }
+    .modal .mhd .ttl{font-weight:1000;}
+    .modal .mbd{ padding: 14px; }
+    .modal textarea{
+      width:100%;
+      background: rgba(10,14,30,.45);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      outline:none;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 160px;
+    }
+    .linkBtn{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor:pointer;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+  
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      margin-top:6px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background: rgba(110,168,255,.55);
+    }
+    .barRow{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 10px;
+      margin-bottom: 8px;
+    }
+    .barTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mono{ font-variant-numeric: tabular-nums; }
+    @media print{
+      body{ background: #fff !important; color:#000 !important; }
+      header, .wrap, .banner{ display:none !important; }
+      .modalOverlay{ position: static !important; inset:auto !important; background: transparent !important; display:block !important; padding:0 !important; }
+      .modal{ width: 100% !important; max-height: none !important; box-shadow:none !important; border:none !important; background:#fff !important; }
+      .modal .mhd{ position: static !important; background:#fff !important; border-bottom: 1px solid #ddd !important; }
+      .btn, .linkBtn, input, select{ display:none !important; }
+      .card{ box-shadow:none !important; border: 1px solid #ddd !important; }
+      .pill{ border: 1px solid #ddd !important; color:#000 !important; background:#f5f5f5 !important; }
+      .kpi{ border: 1px solid #ddd !important; background:#fff !important; }
+      .note{ color:#222 !important; }
+    }
+
+  
+    .dealRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 10px;
+      margin-bottom: 8px;
+    }
+    .dealRow .idx{ font-weight:1000; color: var(--muted); width: 54px; flex:none; }
+    .dealRow input{ max-width: 240px; }
+
+  
+
+    /* --- Micro-Animation (Gewonnen) --- */
+    .fxConfetti{
+      position: fixed;
+      width: 8px;
+      height: 12px;
+      border-radius: 2px;
+      background: rgba(124,240,199,.95);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      animation: confettiFly var(--dur, 650ms) ease-out forwards;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      opacity: .95;
+    }
+    @keyframes confettiFly{
+      0%{ transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+      100%{ transform: translate(calc(-50% + var(--dx, 120px)), calc(-50% + var(--dy, -120px))) rotate(var(--r, 220deg)); opacity: 0; }
+    }
+
+    .fxPop{
+      position: fixed;
+      transform: translate(-50%, -50%) scale(.85);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(232,236,255,.98);
+      background: rgba(110,168,255,.18);
+      border: 1px solid rgba(110,168,255,.45);
+      box-shadow: 0 14px 30px rgba(0,0,0,.35);
+      animation: popIn 900ms ease-out forwards;
+      white-space: nowrap;
+    }
+    @keyframes popIn{
+      0%{ opacity: 0; transform: translate(-50%, -55%) scale(.75); }
+      22%{ opacity: 1; transform: translate(-50%, -65%) scale(1); }
+      100%{ opacity: 0; transform: translate(-50%, -95%) scale(1.05); }
+    }
+
+    /* Top-5 Listen: Platzierung + Medaillen */
+    .rankNum{
+      display:inline-block;
+      min-width: 22px;
+      margin-right:6px;
+      color: var(--muted);
+      font-weight:1000;
+      font-variant-numeric: tabular-nums;
+    }
+    .medal{
+      display:inline-block;
+      width: 22px;
+      margin-right:6px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    }
+    .topItem{
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .topItem:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(0,0,0,.28);
+      border-color: rgba(110,168,255,.26);
+      background: rgba(255,255,255,.06);
+    }
+    .topItem-1{ border-color: rgba(255,215,0,.35) !important; box-shadow: 0 10px 26px rgba(255,215,0,.10); }
+    .topItem-2{ border-color: rgba(192,192,192,.30) !important; box-shadow: 0 10px 26px rgba(192,192,192,.08); }
+    .topItem-3{ border-color: rgba(205,127,50,.30) !important; box-shadow: 0 10px 26px rgba(205,127,50,.08); }
+
+    /* KPI-Hierarchie + Trends */
+
+    /* KPI-Layout: Delta/Callouts ausrichten (gleiche Zeile/Baseline) */
+    .kpi{display:flex;flex-direction:column;}
+    .kpi>.t{order:1;} .kpi>.v{order:2;} .kpi>.s{order:3;}
+    .kpi>.callout{order:4;}
+    .kpi>.delta{order:5;margin-top:auto;align-self:flex-start;}
+
+    .kpi.primary .v{ font-size: 22px; }
+    .kpi .delta{
+      margin-top:6px;
+      font-size:12px;
+      font-weight:1000;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .kpi .delta.up{
+      border-color: rgba(124,240,199,.30);
+      background: rgba(124,240,199,.08);
+      color: rgba(124,240,199,.95);
+    }
+    .kpi .delta.down{
+      border-color: rgba(255,107,107,.30);
+      background: rgba(255,107,107,.08);
+      color: rgba(255,107,107,.95);
+    }
+
+    /* Ziel erreicht Badge */
+    .goalBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight:1000;
+      font-size:12px;
+      border:1px solid rgba(124,240,199,.35);
+      background: rgba(124,240,199,.10);
+      color: rgba(124,240,199,.95);
+      white-space:nowrap;
+    }
+
+  
+    /* --- Motivation & Gamification UI --- */
+    .topItem{
+      transition: transform .12s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .topItem:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 38px rgba(0,0,0,.35);
+      border-color: rgba(110,168,255,.25);
+      background: rgba(255,255,255,.06);
+    }
+    .rankNum{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 32px;
+      margin-right: 6px;
+      color: rgba(232,236,255,.92);
+      font-weight: 1000;
+    }
+    .medal{
+      margin-right: 8px;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
+    }
+    .topItem-1{ border-color: rgba(255,215,0,.35); box-shadow: 0 0 0 1px rgba(255,215,0,.10) inset, var(--shadow); }
+    .topItem-2{ border-color: rgba(220,220,220,.22); box-shadow: 0 0 0 1px rgba(220,220,220,.08) inset, var(--shadow); }
+    .topItem-3{ border-color: rgba(205,127,50,.25); box-shadow: 0 0 0 1px rgba(205,127,50,.08) inset, var(--shadow); }
+
+    .statusGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      align-items:start;
+    }
+    .statusMain{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding: 12px 12px;
+      min-height: 140px;
+    }
+    .statusSide{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding: 12px 12px;
+      min-height: 140px;
+    }
+    .statusLine{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing: .2px;
+    }
+    .statusSub{
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+    .badgeRow{
+      margin-top: 10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+    }
+    .badgeChip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 1000;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(232,236,255,.95);
+      white-space:nowrap;
+    }
+    .badgeChip.good{
+      border-color: rgba(124,240,199,.30);
+      background: rgba(124,240,199,.10);
+      color: rgba(124,240,199,.95);
+    }
+    .badgeChip.warn{
+      border-color: rgba(255,204,102,.30);
+      background: rgba(255,204,102,.10);
+      color: rgba(255,204,102,.95);
+    }
+    .sparkWrap{
+      width:100%;
+      height: 76px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 8px;
+    }
+    .sparkWrap canvas{ width:100% !important; height: 56px !important; }
+
+    @media (max-width: 1250px){
+      .statusGrid{ grid-template-columns: 1fr; }
+    }
+
+    /* kleine Callouts innerhalb KPIs */
+    .kpi .callout{
+      margin-top: 8px;
+      padding: 7px 9px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(232,236,255,.92);
+      line-height: 1.25;
+    }
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Vertriebswochenplanung</h1>
+  <p class="sub">
+  <b>Jahresauswertung</b> · <b>Team Reuter &amp; Lorenz</b><br/>
+  Primär: <b>Wärmepumpen-Termine (WP)</b>. Abschlüsse werden mit <b>Kundenname</b>, <b>Wärmepumpentyp</b> und <b>Umsatz</b> erfasst.
+</p>
+</header>
+
+
+<div class="banner" id="pageNav" style="margin-top:12px;">
+  <div class="row" style="gap:8px; flex-wrap:wrap;">
+    <button class="btn" id="navPlanBtn">Seite 1: Wochenplan</button>
+    <button class="btn secondary" id="navDealsBtn">Seite 2: Kunden & Umsätze</button>
+  </div>
+  <div class="muted" style="font-weight:1000; font-size:12px;">
+    Wechsel zwischen Planung und Detailübersicht je Vertriebler.
+  </div>
+</div>
+
+
+<div class="banner" id="deadlineBanner" style="display:none;">
+  <div class="muted" id="deadlineText">—</div>
+  <div class="row" style="gap:8px;">
+    <button class="btn secondary" id="meetingViewBtn">Meeting-Ansicht</button>
+  </div>
+</div>
+
+<div class="wrap" id="pagePlan">
+  <!-- LEFT -->
+  <div class="col" style="gap:16px;">
+    <div class="card">
+      <div class="hd">
+        <h2>Team</h2>
+        <span class="pill" id="repCountPill">0 Verkäufer</span>
+      </div>
+      <div class="bd">
+        <div class="col">
+          <div class="col">
+            <label for="newRep">Vertriebler hinzufügen</label>
+            <div class="row">
+              <input id="newRep" type="text" placeholder="z. B. Max Mustermann" />
+              <button class="btn" id="addRepBtn">＋</button>
+            </div>
+          </div>
+
+          <div class="repList" id="repList"></div>
+
+          <hr style="border:none;border-top:1px solid var(--line); margin: 12px 0;">
+
+          <div class="col">
+            <div class="row" style="justify-content:space-between;">
+              <span class="muted" style="font-weight:1000; font-size:12px; letter-spacing:.25px; text-transform:uppercase;">Daten</span>
+              <span class="pill">localStorage</span>
+            </div>
+
+            <div class="row" style="flex-wrap:wrap;">
+              <button class="btn secondary" id="exportBtn">Export (JSON)</button>
+              <button class="btn secondary" id="importBtn">Import</button>
+              <input type="file" id="importFile" accept="application/json" style="display:none;">
+              <button class="btn danger" id="resetBtn">Alles löschen</button>
+            </div>
+
+            <div class="row" style="flex-wrap:wrap; margin-top:6px;">
+              <button class="btn secondary" id="icsImportBtn">Kalender-Import (.ics)</button>
+              <input type="file" id="icsFile" accept=".ics,text/calendar" style="display:none;">
+              <span class="pill" id="icsPill">optional</span>
+            </div>
+
+
+            <div class="toggle">
+              <input type="checkbox" id="lockOnClosed" checked>
+              <label for="lockOnClosed" style="margin:0; cursor:pointer;">Eingaben sperren, wenn Status „abgeschlossen“</label>
+            </div>
+
+            <div class="toggle">
+              <input type="checkbox" id="showMiniKpis" checked>
+              <label for="showMiniKpis" style="margin:0; cursor:pointer;">Mini-KPIs anzeigen (optional)</label>
+            </div>
+
+            <p class="note">
+              Empfehlung: Sonntag → Planung (Ziele, WP, PV-Zusatz, Plan-Abschlüsse, Umsatz/Abschluss).
+              Wochenende → Ist (durchgeführt/No-Show, Ist-Abschlüsse, Status).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkliste -->
+    <div class="card">
+      <div class="hd">
+        <h2>Woche – Checkliste</h2>
+        <span class="pill" id="checkPill">—</span>
+      </div>
+      <div class="bd">
+        <div class="note" style="margin-bottom:10px;">
+          Übersicht: Wer hat noch nicht abgeschlossen? (Status und letzte Änderung).
+        </div>
+        <div id="checkList"></div>
+      </div>
+    </div>
+
+    <!-- Ranking -->
+    <div class="card">
+      <div class="hd">
+        <h2>Ranking (Ø pro Woche)</h2>
+        <span class="pill" id="rankPill">—</span>
+      </div>
+      <div class="bd">
+        <div class="note" style="margin-bottom:8px;">
+          Durchschnitt über 52 Wochen. Conversion: Ist-Abschlüsse / WP geplant (primär).
+        </div>
+        <div style="overflow:auto; border:1px solid rgba(255,255,255,.10); border-radius: 14px;">
+          <table class="rankTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Vertriebler</th>
+                <th>Ø WP</th>
+                <th>Ø Abschl.</th>
+                <th>Conv.</th>
+                <th>Ø Umsatz</th>
+              </tr>
+            </thead>
+            <tbody id="rankBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="mainGrid">
+    <!-- Month summary -->
+    <div class="card">
+      <div class="hd">
+        <h2>Monatsauswertung</h2>
+        <span class="pill" id="monthPill">—</span>
+      </div>
+      <div class="bd">
+        <div class="toolbar" style="align-items:flex-end;">
+          <div class="left">
+            <div style="min-width:220px;">
+              <label for="yearSelect">Jahr</label>
+              <select id="yearSelect"></select>
+            </div>
+            <div style="min-width:220px;">
+              <label for="monthSelect">Monat</label>
+              <select id="monthSelect"></select>
+            </div>
+            <div style="min-width:220px;">
+              <label for="periodSelect">Ansicht</label>
+              <select id="periodSelect">
+                <option value="month">Monat</option>
+                <option value="year">Jahr</option>
+              </select>
+            </div>
+          </div>
+          <div class="right">
+            <span class="pill" id="monthWeeksPill">Wochen: —</span>
+          </div>
+        </div>
+
+        <div class="kpiGrid" style="grid-template-columns: repeat(4, minmax(0,1fr));">
+          <div class="kpi primary">
+            <div class="t">WP geplant</div>
+            <div class="v" id="mWP">0</div>
+            <div class="s" id="mScopeLabel">Monat</div>
+            <div class="callout" id="mCalloutWP" style="display:none;"></div>
+          </div>
+          <div class="kpi">
+            <div class="t">WP durchgeführt</div>
+            <div class="v" id="mDone">0</div>
+            <div class="s" id="mShow">Show-Rate: 0%</div>
+            <div class="delta" id="dDone" style="display:none;"></div>
+          </div>
+          <div class="kpi primary">
+            <div class="t">Abschlüsse</div>
+            <div class="v" id="mCloses">0</div>
+            <div class="s" id="mConv">Conversion: 0%</div>
+            <div class="delta" id="dCl" style="display:none;"></div>
+            <div class="callout" id="mCalloutCl" style="display:none;"></div>
+          </div>
+          <div class="kpi primary">
+            <div class="t">Umsatz (Ist)</div>
+            <div class="v" id="mRev">0 €</div>
+            <div class="s" id="mFc">Forecast: 0 €</div>
+            <div class="delta" id="dRev" style="display:none;"></div>
+            <div class="callout" id="mCalloutRev" style="display:none;"></div>
+            <div class="s" id="mStorno">Storno: 0/0 (0%)</div>
+          </div>
+        
+        <div class="card" id="personalPanel" style="border-radius: 16px; margin-top:12px; display:none;">
+          <div class="hd">
+            <h2>Dein Status heute</h2>
+            <span class="pill scopePill" id="personalScopePill">Monat</span>
+          </div>
+          <div class="bd">
+            <div class="statusGrid">
+              <div class="statusMain">
+                <div class="statusLine" id="psRank">—</div>
+                <div class="statusSub muted" id="psGap">—</div>
+                <div class="badgeRow" id="psBadges"></div>
+                <div class="note" id="psNextAction" style="margin-top:10px;">—</div>
+              </div>
+              <div class="statusSide">
+                <div class="sparkWrap">
+                  <canvas id="psSpark"></canvas>
+                </div>
+                <div class="note" id="psTimePressure" style="margin-top:10px;">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+</div>
+
+        
+        <div class="card" style="border-radius: 16px; margin-top:12px;">
+          <div class="hd">
+            <h2>Monatsranking</h2>
+            <span class="pill">WP – Termine & Abschlüsse</span>
+          </div>
+          <div class="bd">
+            <div class="note" style="margin-bottom:8px;">
+              Ranking für den ausgewählten Monat (Filter „Alle Verkäufer“ oder einzelner Verkäufer oben).
+            </div>
+            <div style="overflow:auto; border:1px solid rgba(255,255,255,.10); border-radius: 14px;">
+              <table class="rankTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Vertriebler</th>
+                    <th>Termine durchgeführt</th>
+                    <th>Abschlüsse (WP)</th>
+                    <th>Umsatz</th>
+                  </tr>
+                </thead>
+                <tbody id="monthRankBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+<div class="chartsGrid" style="margin-top:12px; grid-template-columns: 1fr 1fr 1fr;">
+          <div class="card" style="border-radius: 16px;">
+            <div class="hd">
+              <h2>Top 5 – Umsatz</h2>
+              <span class="pill scopePill">Monat</span>
+            </div>
+            <div class="bd">
+              <div id="topRev"></div>
+            </div>
+          </div>
+          <div class="card" style="border-radius: 16px;">
+            <div class="hd">
+              <h2>Top 5 – Abschlüsse</h2>
+              <span class="pill scopePill">Monat</span>
+            </div>
+            <div class="bd">
+              <div id="topCl"></div>
+            </div>
+          </div>
+
+          <div class="card" style="border-radius: 16px;">
+            <div class="hd">
+              <h2>Top 5 – Termine</h2>
+              <span class="pill scopePill">Monat</span>
+            </div>
+            <div class="bd">
+              <div id="topWp"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card" style="border-radius: 16px; margin-top:12px;">
+          <div class="hd">
+            <h2>Most Improved</h2>
+            <span class="pill">vs. Vormonat</span>
+          </div>
+          <div class="bd">
+            <div id="mostImproved" class="note">—</div>
+          </div>
+        </div>
+
+      </div>
+
+                <div class="card" style="border-radius: 16px; margin-top:12px;">
+          <div class="hd">
+            <h2>Zielerreichung (Termine &amp; Abschlüsse)</h2>
+            <span class="pill scopePill">Monat</span>
+          </div>
+          <div class="bd">
+            <div class="note" style="margin-bottom:10px;">
+              Ziele werden pro Vertriebler erfasst: <b>Monatsziel Termine (WP)</b>, <b>Monatsziel Abschlüsse (WP)</b>, <b>Jahresziel Abschlüsse (WP)</b>.
+              Der Balken färbt sich von <b>Rot</b> über <b>Orange</b> bis <b>Grün</b>, je näher man ans Ziel kommt.
+            </div>
+            <div id="monthGoals"></div>
+          </div>
+        </div>
+
+<!-- Week entry -->
+    <div class="card">
+      <div class="hd">
+        <h2>Wocheneingabe</h2>
+        <span class="pill" id="weekPill">Woche 1</span>
+      </div>
+      <div class="bd">
+        <div class="toolbar">
+          <div class="left">
+            <div style="min-width:220px;">
+              <label for="weekSelect">Woche auswählen</label>
+              <select id="weekSelect"></select>
+            </div>
+            <div style="min-width:260px;">
+              <label for="sellerFocus">Auswertung filtern</label>
+              <select id="sellerFocus">
+                <option value="">Alle Verkäufer</option>
+              </select>
+            </div>
+          </div>
+          <div class="right">
+            <button class="btn secondary" id="setAllInWorkBtn">Alle → in Arbeit</button>
+            <button class="btn secondary" id="setAllClosedBtn">Alle → abgeschlossen</button>
+            <button class="btn" id="fillPlannedHintBtn">Hinweis: Sonntag → Planung</button>
+            <button class="btn secondary" id="fillActualHintBtn">Hinweis: Wochenende → Ist</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpiGrid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+          <div class="kpi">
+            <div class="t">Jahr WP Ziel</div>
+            <div class="v" id="kpiYearWP">0</div>
+            <div class="s">Ziel Wärmepumpen-Termine</div>
+          </div>
+          <div class="kpi">
+            <div class="t">Jahr durchgeführt</div>
+            <div class="v" id="kpiYearDone">0</div>
+            <div class="s">Show-Rate basiert darauf</div>
+          </div>
+          <div class="kpi">
+            <div class="t">Show-Rate</div>
+            <div class="v" id="kpiShowRate">0%</div>
+            <div class="s">durchgeführt / Ziel</div>
+          </div>
+          <div class="kpi">
+            <div class="t">Jahr Abschlüsse</div>
+            <div class="v" id="kpiYearCloses">0</div>
+            <div class="s" id="kpiConv">Conversion: 0%</div>
+          </div>
+          <div class="kpi primary">
+            <div class="t">Umsatz (Ist)</div>
+            <div class="v" id="kpiYearRevenue">0 €</div>
+            <div class="s">Summe aus Abschlussdetails</div>
+          </div>
+        </div>
+
+        <div id="miniKpiPanel" style="margin-top:10px; display:none;">
+          <div class="note">
+            Mini-KPIs (Filter oben beachten): Ø Umsatz/Abschluss (letzte 4 Wochen), Streak „Ziel erreicht“ (Wochen am Stück).
+          </div>
+          <div class="row" style="margin-top:8px; flex-wrap:wrap;">
+            <span class="pill" id="miniAvgRpc">Ø €/Abschluss (4W): —</span>
+            <span class="pill" id="miniStreak">Streak Ziele: —</span>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:220px;">Vertriebler</th>
+
+                <th>Ziel Wärmepumpe Termine</th>
+                <th>Ziel Abschl.</th>
+                <th>Ampel</th>
+
+                <th>WP Termine durchgeführt</th>
+                <th>No-Show</th>
+
+                <th>Ist Abschl.</th>
+
+                <th>Umsatz</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="weekTableBody"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:10px" class="note">
+          Regeln: <b>WP Termine durchgeführt + No-Show ≤ Ziel Wärmepumpe Termine</b> und <b>Ist-Abschlüsse ≤ WP Termine durchgeführt</b>.</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chartsGrid">
+      <div class="card chartCard">
+        <div class="hd">
+          <h2>Jahresgrafik (Zeitreihe)</h2>
+          <span class="pill" id="chartScopePill">Alle Verkäufer</span>
+        </div>
+        <div class="bd">
+          <canvas id="yearChart"></canvas>
+          <p class="note" style="margin-top:10px;">
+            WP Ziel, durchgeführt, No-Show, Ist-Abschlüsse und Umsatz (Ist).
+          </p>
+        </div>
+      </div>
+
+  </div>
+</div>
+
+
+
+<div class="wrap" id="pageDeals" style="display:none;">
+  <div class="col" style="gap:16px;">
+    <div class="card">
+      <div class="hd">
+        <h2>Kunden & Umsätze</h2>
+        <span class="pill" id="dealsPill">—</span>
+      </div>
+      <div class="bd">
+        <div class="toolbar">
+          <div class="left">
+            <div style="min-width:260px;">
+              <label for="dealsRepSelect">Vertriebler auswählen</label>
+              <select id="dealsRepSelect">
+                <option value="">Alle Vertriebler</option>
+              </select>
+            </div>
+          </div>
+          <div class="right">
+            <button class="btn secondary" id="dealsExpandAllBtn">Alle aufklappen</button>
+            <button class="btn secondary" id="dealsCollapseAllBtn">Alle zuklappen</button>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+        <div id="dealsOverview" class="note"></div>
+        <div style="height:12px"></div>
+
+        <div id="dealsAccordion"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modalOverlay" id="meetingModal">
+  <div class="modal">
+    <div class="mhd">
+      <div class="ttl" id="meetingTitle">Meeting-Ansicht</div>
+      <div class="row" style="gap:8px;">
+        <button class="btn secondary" id="meetingPrintBtn">Drucken / PDF</button>
+        <button class="btn secondary" id="meetingCloseBtn">Schließen</button>
+      </div>
+    </div>
+    <div class="mbd">
+      <div class="note" style="margin-bottom:10px;">
+        1-Seiten-Übersicht für Teammeeting: Monatssummary, Top 5, Most Improved, offene Woche-Checkliste.
+      </div>
+      <div class="kpiGrid" style="grid-template-columns: repeat(5, minmax(0,1fr));" id="meetingKpis"></div>
+
+      <div class="chartsGrid" style="margin-top:12px; grid-template-columns: 1fr 1fr;">
+        <div class="card" style="border-radius: 16px;">
+          <div class="hd"><h2>Top 5 – Umsatz</h2><span class="pill scopePill">Monat</span></div>
+          <div class="bd"><div id="meetingTopRev"></div></div>
+        </div>
+        <div class="card" style="border-radius: 16px;">
+          <div class="hd"><h2>Top 5 – Abschlüsse</h2><span class="pill scopePill">Monat</span></div>
+          <div class="bd"><div id="meetingTopCl"></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="border-radius: 16px; margin-top:12px;">
+        <div class="hd"><h2>Most Improved</h2><span class="pill">vs. Vormonat</span></div>
+        <div class="bd"><div id="meetingMostImproved" class="note">—</div></div>
+      </div>
+
+      <div class="card" style="border-radius: 16px; margin-top:12px;">
+        <div class="hd"><h2>Woche – offen</h2><span class="pill" id="meetingWeekPill">—</span></div>
+        <div class="bd"><div id="meetingChecklist"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modalOverlay" id="closeDetailModal">
+  <div class="modal">
+    <div class="mhd">
+      <div class="ttl" id="closeDetailTitle">Abschlussdetails</div>
+      <div class="row" style="gap:8px;">
+        <button class="btn secondary" id="closeDetailSaveBtn">Speichern</button>
+        <button class="btn secondary" id="closeDetailCloseBtn">Schließen</button>
+      </div>
+    </div>
+    <div class="mbd">
+      <div class="note" style="margin-bottom:10px;">
+        Pro Abschluss: <b>Kundenname</b>, <b>Wärmepumpentyp</b>, <b>Umsatz</b>. Optional kannst du später <b>Storno</b> markieren (wird aus Umsatz herausgerechnet, Stornoquote wird ausgewiesen).
+      </div>
+      <div id="closeDetailList"></div>
+      <div class="row" style="margin-top:10px; justify-content:space-between; flex-wrap:wrap;">
+        <span class="pill" id="closeDetailSumPill">Summe: —</span>
+        <span class="pill" id="closeDetailCountPill">Abschlüsse: —</span>
+        <span class="pill" id="closeDetailStornoPill">Storno: —</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "vertriebswochenplanung_wp_only_v2_2_kpi_delta_aligned";
+
+  const defaultState = { reps: [], weeks: {}, targets: { months: {}, years: {} } };
+  let state = loadState();
+
+  const repCountPill = document.getElementById("repCountPill");
+  const repList = document.getElementById("repList");
+  const newRep = document.getElementById("newRep");
+  const addRepBtn = document.getElementById("addRepBtn");
+
+  const weekSelect = document.getElementById("weekSelect");
+  const weekPill = document.getElementById("weekPill");
+  const weekTableBody = document.getElementById("weekTableBody");
+
+  const sellerFocus = document.getElementById("sellerFocus");
+  const chartScopePill = document.getElementById("chartScopePill");
+
+  const exportBtn = document.getElementById("exportBtn");
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
+  const resetBtn = document.getElementById("resetBtn");
+
+  const icsImportBtn = document.getElementById("icsImportBtn");
+  const icsFile = document.getElementById("icsFile");
+  const icsPill = document.getElementById("icsPill");
+
+  const lockOnClosed = document.getElementById("lockOnClosed");
+  const showMiniKpis = document.getElementById("showMiniKpis");
+
+  const kpiYearWP = document.getElementById("kpiYearWP");
+  const kpiYearDone = document.getElementById("kpiYearDone");
+  const kpiShowRate = document.getElementById("kpiShowRate");
+  const kpiYearCloses = document.getElementById("kpiYearCloses");
+  const kpiConv = document.getElementById("kpiConv");
+  const kpiYearRevenue = document.getElementById("kpiYearRevenue");
+
+  const miniKpiPanel = document.getElementById("miniKpiPanel");
+  const miniAvgRpc = document.getElementById("miniAvgRpc");
+  const miniStreak = document.getElementById("miniStreak");
+
+  const checkList = document.getElementById("checkList");
+  const checkPill = document.getElementById("checkPill");
+
+  const rankBody = document.getElementById("rankBody");
+  const rankPill = document.getElementById("rankPill");
+
+  const fillPlannedHintBtn = document.getElementById("fillPlannedHintBtn");
+  const fillActualHintBtn = document.getElementById("fillActualHintBtn");
+  const setAllInWorkBtn = document.getElementById("setAllInWorkBtn");
+  const setAllClosedBtn = document.getElementById("setAllClosedBtn");
+
+  // Month UI
+  const yearSelect = document.getElementById("yearSelect");
+  const monthSelect = document.getElementById("monthSelect");
+  const periodSelect = document.getElementById("periodSelect");
+  const monthPill = document.getElementById("monthPill");
+  const monthWeeksPill = document.getElementById("monthWeeksPill");
+  const mScopeLabel = document.getElementById("mScopeLabel");
+  const mWP = document.getElementById("mWP");
+  const mDone = document.getElementById("mDone");
+  const mShow = document.getElementById("mShow");
+  const mCloses = document.getElementById("mCloses");
+  const mConv = document.getElementById("mConv");
+  const mRev = document.getElementById("mRev");
+  const mFc = document.getElementById("mFc");
+  const mStorno = document.getElementById("mStorno");
+  const mCalloutWP = document.getElementById("mCalloutWP");
+  const mCalloutCl = document.getElementById("mCalloutCl");
+  const mCalloutRev = document.getElementById("mCalloutRev");
+  const topRev = document.getElementById("topRev");
+  const topCl = document.getElementById("topCl");
+  const monthRankBody = document.getElementById("monthRankBody");
+  const topWp = document.getElementById("topWp");
+  const mostImproved = document.getElementById("mostImproved");
+  const monthGoals = document.getElementById("monthGoals");
+  // Personal Panel (Motivation)
+  const personalPanel = document.getElementById("personalPanel");
+  const personalScopePill = document.getElementById("personalScopePill");
+  const psRank = document.getElementById("psRank");
+  const psGap = document.getElementById("psGap");
+  const psBadges = document.getElementById("psBadges");
+  const psNextAction = document.getElementById("psNextAction");
+  const psTimePressure = document.getElementById("psTimePressure");
+  const psSpark = document.getElementById("psSpark");
+  let psSparkChart;
+
+
+  // KPI deltas
+  const dWP = document.getElementById("dWP");
+  const dDone = document.getElementById("dDone");
+  const dCl = document.getElementById("dCl");
+  const dRev = document.getElementById("dRev");
+
+
+  // Pages
+  const pagePlan = document.getElementById("pagePlan");
+  const pageDeals = document.getElementById("pageDeals");
+  const navPlanBtn = document.getElementById("navPlanBtn");
+  const navDealsBtn = document.getElementById("navDealsBtn");
+
+  // Deals page UI
+  const dealsRepSelect = document.getElementById("dealsRepSelect");
+  const dealsAccordion = document.getElementById("dealsAccordion");
+  const dealsOverview = document.getElementById("dealsOverview");
+  const dealsPill = document.getElementById("dealsPill");
+  const dealsExpandAllBtn = document.getElementById("dealsExpandAllBtn");
+  const dealsCollapseAllBtn = document.getElementById("dealsCollapseAllBtn");
+
+  // Meeting UI
+  const deadlineBanner = document.getElementById("deadlineBanner");
+  const deadlineText = document.getElementById("deadlineText");
+  const meetingViewBtn = document.getElementById("meetingViewBtn");
+  const meetingModal = document.getElementById("meetingModal");
+  const meetingCloseBtn = document.getElementById("meetingCloseBtn");
+  const meetingPrintBtn = document.getElementById("meetingPrintBtn");
+  const meetingTitle = document.getElementById("meetingTitle");
+  const meetingKpis = document.getElementById("meetingKpis");
+  const meetingTopRev = document.getElementById("meetingTopRev");
+  const meetingTopCl = document.getElementById("meetingTopCl");
+  const meetingMostImproved = document.getElementById("meetingMostImproved");
+  const meetingChecklist = document.getElementById("meetingChecklist");
+  const meetingWeekPill = document.getElementById("meetingWeekPill");
+
+  // Abschlussdetails (Modal)
+  const closeDetailModal = document.getElementById("closeDetailModal");
+  const closeDetailTitle = document.getElementById("closeDetailTitle");
+  const closeDetailList = document.getElementById("closeDetailList");
+  const closeDetailSaveBtn = document.getElementById("closeDetailSaveBtn");
+  const closeDetailCloseBtn = document.getElementById("closeDetailCloseBtn");
+  const closeDetailSumPill = document.getElementById("closeDetailSumPill");
+  const closeDetailCountPill = document.getElementById("closeDetailCountPill");
+  const closeDetailStornoPill = document.getElementById("closeDetailStornoPill");
+
+  let closeCtx = { week: null, repId: null }; 
+
+
+  let yearChart;
+
+  const STATUS_OPTIONS = [
+    { value: "geplant", label: "geplant" },
+    { value: "in_arbeit", label: "in Arbeit" },
+    { value: "abgeschlossen", label: "abgeschlossen" }
+  ];
+
+  // Init week select 1..53
+  for (let w=1; w<=53; w++){
+    const opt = document.createElement("option");
+    opt.value = String(w);
+    opt.textContent = `Woche ${w}`;
+    weekSelect.appendChild(opt);
+  }
+  let currentWeek = 1;
+  weekSelect.value = String(currentWeek);
+
+  // Init year/month selects
+  // Auswertung startet ab Januar 2025, auswählbar 5 Jahre (2025–2029)
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const YEAR_START = 2025;
+  const YEAR_COUNT = 5;
+  for (let y = YEAR_START; y < YEAR_START + YEAR_COUNT; y++){
+    const o = document.createElement("option");
+    o.value = String(y);
+    o.textContent = String(y);
+    yearSelect.appendChild(o);
+  }
+  // Default: aktuelles Jahr, wenn im Bereich; sonst 2025
+  if (currentYear >= YEAR_START && currentYear < YEAR_START + YEAR_COUNT) yearSelect.value = String(currentYear);
+  else yearSelect.value = String(YEAR_START);
+
+
+  const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  monthNames.forEach((m, idx) => {
+    const o = document.createElement("option");
+    o.value = String(idx+1);
+    o.textContent = m;
+    monthSelect.appendChild(o);
+  });
+  monthSelect.value = String(now.getMonth()+1);
+
+  if (periodSelect) periodSelect.value = "month";
+  function uid(){
+    return Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+  function clampInt(n){
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return Math.floor(n);
+  }
+  function clampMoney(n){
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return Math.round(n*100)/100;
+  }
+  function euros(n){
+    const v = clampMoney(Number(n) || 0);
+    return new Intl.NumberFormat("de-DE", { style:"currency", currency:"EUR", maximumFractionDigits:0 }).format(v);
+  }
+  function pct(n){
+    return new Intl.NumberFormat("de-DE", { style:"percent", maximumFractionDigits:1 }).format(Number.isFinite(n) ? n : 0);
+  }
+  function fmtDateTime(ts){
+    if (!ts) return "—";
+    try{
+      const d = new Date(ts);
+      return d.toLocaleString("de-DE", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }catch(e){ return "—"; }
+  }
+
+  function ensureWeek(week){
+    if (!state.weeks[week]) state.weeks[week] = {};
+  }
+  function ensureRepWeekData(week, repId){
+    ensureWeek(week);
+    if (!state.weeks[week][repId]){
+      state.weeks[week][repId] = {
+        targetWP: 0,
+        targetCloses: 0,
+
+        wpDone: 0,
+        noShow: 0,
+
+        actualCloses: 0,
+
+        status: "geplant",
+        lastUpdated: Date.now(),
+
+        // Abschlussdetails: [{ kunde, typ, umsatz }]
+        wpDeals: []
+      };
+    }
+
+    // migrate from earlier variants
+    const d = state.weeks[week][repId];
+    if (typeof d.wpAppts === "number" && typeof d.targetWP !== "number") d.targetWP = d.wpAppts;
+    if (typeof d.wpDone !== "number") d.wpDone = 0;
+    if (typeof d.noShow !== "number") d.noShow = 0;
+    if (typeof d.targetWP !== "number") d.targetWP = 0;
+    if (typeof d.targetCloses !== "number") d.targetCloses = 0;
+    if (!d.status) d.status = "geplant";
+    if (typeof d.lastUpdated !== "number") d.lastUpdated = Date.now();
+    if (!Array.isArray(d.wpDeals)) d.wpDeals = [];
+
+    delete d.wpAppts;
+  }
+
+  function loadState(){
+    try{
+      // Start sauber: alte Versionen nicht übernehmen
+      ["vertriebswochenplanung_reuter_lorenz_wp_only_v1_0",
+       "vertriebswochenplanung_reuter_lorenz_wp_only_v1_1",
+       "vertriebswochenplanung_reuter_lorenz_wp_only_v1_2",
+       "vertriebswochenplanung_reuter_lorenz_wp_only_v1_3",
+       "vertriebswochenplanung_reuter_lorenz_wp_only_v1_4",
+       "vertrieb_wochenplan_final_v1_2"
+      ].forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(defaultState);
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return structuredClone(defaultState);
+      parsed.reps ||= [];
+      parsed.weeks ||= {};
+      parsed.targets ||= { months: {}, years: {} };
+      return parsed;
+    }catch(e){
+      return structuredClone(defaultState);
+    }
+  }
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function renderReps(){
+    repList.innerHTML = "";
+    repCountPill.textContent = `${state.reps.length} Verkäufer`;
+
+    const prev = sellerFocus.value;
+    sellerFocus.innerHTML = `<option value="">Alle Verkäufer</option>`;
+    state.reps.forEach(r => {
+      const o = document.createElement("option");
+      o.value = r.id;
+      o.textContent = r.name;
+      sellerFocus.appendChild(o);
+    });
+    if ([...sellerFocus.options].some(o => o.value === prev)) sellerFocus.value = prev;
+    else sellerFocus.value = "";
+
+    // deals page select
+    const prevDeals = dealsRepSelect ? dealsRepSelect.value : "";
+    if (dealsRepSelect){
+      dealsRepSelect.innerHTML = `<option value="">Alle Vertriebler</option>`;
+      state.reps.forEach(r => {
+        const o2 = document.createElement("option");
+        o2.value = r.id;
+        o2.textContent = r.name;
+        dealsRepSelect.appendChild(o2);
+      });
+      if ([...dealsRepSelect.options].some(o => o.value === prevDeals)) dealsRepSelect.value = prevDeals;
+      else dealsRepSelect.value = "";
+    }
+
+
+    state.reps.forEach(rep => {
+      const div = document.createElement("div");
+      div.className = "repItem";
+      const left = document.createElement("div");
+      left.style.display = "flex";
+      left.style.flexDirection = "column";
+      left.style.gap = "2px";
+
+      const name = document.createElement("div");
+      name.className = "repName";
+      name.title = rep.name;
+      name.textContent = rep.name;
+
+      const sub = document.createElement("div");
+      sub.className = "muted";
+      sub.style.fontSize = "12px";
+      sub.textContent = "WP/PV-Zusatz, Ziele, Forecast, Show-Rate, Status";
+
+      left.appendChild(name);
+      left.appendChild(sub);
+
+      const del = document.createElement("button");
+      del.className = "btn danger tiny";
+      del.textContent = "Löschen";
+      del.onclick = () => {
+        if (!confirm(`Vertriebler "${rep.name}" wirklich löschen?`)) return;
+        state.reps = state.reps.filter(x => x.id !== rep.id);
+        Object.keys(state.weeks).forEach(w => {
+          if (state.weeks[w] && state.weeks[w][rep.id]) delete state.weeks[w][rep.id];
+        });
+        saveState();
+        renderAll();
+      };
+
+      div.appendChild(left);
+      div.appendChild(del);
+      repList.appendChild(div);
+    });
+  }
+
+  function makeNumberInput(value, cls, onChange, suffix, allowDecimals=false, disabled=false){
+    const wrap = document.createElement("div");
+    wrap.style.display = "flex";
+    wrap.style.alignItems = "center";
+    wrap.style.gap = "8px";
+
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.min = "0";
+    inp.step = allowDecimals ? "0.01" : "1";
+    inp.value = String(Number.isFinite(Number(value)) ? Number(value) : 0);
+    inp.className = cls;
+    inp.disabled = !!disabled;
+    inp.addEventListener("change", () => {
+      let v = Number(inp.value);
+      if (!Number.isFinite(v) || v < 0) v = 0;
+      v = allowDecimals ? clampMoney(v) : clampInt(v);
+      inp.value = String(v);
+      onChange(v);
+    });
+
+    wrap.appendChild(inp);
+    if (suffix){
+      const s = document.createElement("span");
+      s.className = "muted";
+      s.style.fontWeight = "1000";
+      s.textContent = suffix;
+      wrap.appendChild(s);
+    }
+    return wrap;
+  }
+
+  function makeStatusSelect(value, cls, onChange){
+    const sel = document.createElement("select");
+    sel.className = cls;
+    STATUS_OPTIONS.forEach(o => {
+      const opt = document.createElement("option");
+      opt.value = o.value;
+      opt.textContent = o.label;
+      sel.appendChild(opt);
+    });
+    sel.value = STATUS_OPTIONS.some(x => x.value === value) ? value : "geplant";
+    sel.addEventListener("change", () => onChange(sel.value));
+    return sel;
+  }
+
+  function trafficLight(d){
+    const wpBase = clampInt(d.wpDone) + clampInt(d.noShow); // Ist-WP (durchgeführt + No-Show)
+    const closesBase = clampInt(d.actualCloses);
+
+    const tWP = clampInt(d.targetWP);
+    const tCl = clampInt(d.targetCloses);
+
+    if (tWP + tCl === 0){
+      return { label: "kein Ziel", color: "rgba(255,255,255,.35)" };
+    }
+
+    function ratio(actual, target){
+      if (target <= 0) return 1;
+      return actual / target;
+    }
+    const r1 = ratio(wpBase, tWP);
+    const r2 = ratio(closesBase, tCl);
+
+    const score = (r1 + r2) / 2;
+    if (score >= 1.0) return { label: "grün", color: "rgba(124,240,199,.95)" };
+    if (score >= 0.8) return { label: "gelb", color: "rgba(255,204,102,.95)" };
+    return { label: "rot", color: "rgba(255,107,107,.95)" };
+  }
+
+  function rowWarnings(d){
+    const warnings = [];
+    const wpPlanned = clampInt(d.targetWP); // Ziel-WP
+    if (clampInt(d.wpDone) + clampInt(d.noShow) > wpPlanned) warnings.push("durchgeführt + No-Show > Ziel WP");
+    if (clampInt(d.actualCloses) > clampInt(d.wpDone)) warnings.push("Ist-Abschlüsse > WP durchgeführt");
+    return warnings;
+  }
+
+  function renderWeekTable(){
+    weekPill.textContent = `Woche ${currentWeek}`;
+    ensureWeek(String(currentWeek));
+    weekTableBody.innerHTML = "";
+
+    if (state.reps.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="9" style="padding:16px; color: var(--muted); font-weight:1000;">
+        Keine Vertriebler vorhanden. Bitte links zuerst Namen hinzufügen.
+      </td>`;
+      weekTableBody.appendChild(tr);
+      return;
+    }
+
+    state.reps.forEach(rep => {
+      ensureRepWeekData(String(currentWeek), rep.id);
+      const d = state.weeks[String(currentWeek)][rep.id];
+
+      // normalize
+      d.targetWP = clampInt(d.targetWP);
+      d.targetCloses = clampInt(d.targetCloses);
+      d.wpDone = clampInt(d.wpDone);
+      d.noShow = clampInt(d.noShow);
+      d.actualCloses = clampInt(d.actualCloses);
+      if (!Array.isArray(d.wpDeals)) d.wpDeals = [];
+
+      // rules (Plan = Ziel)
+      const wpPlanned = d.targetWP;
+      if (d.wpDone + d.noShow > wpPlanned){
+        const over = (d.wpDone + d.noShow) - wpPlanned;
+        d.noShow = Math.max(0, d.noShow - over);
+      }
+      if (d.actualCloses > d.wpDone) d.actualCloses = d.wpDone;
+
+      // ensure deals array length
+      // Hinweis: wpDeals werden nicht mehr automatisch gekürzt, um Datenverlust zu vermeiden.
+
+      const isLocked = lockOnClosed.checked && d.status === "abgeschlossen";
+
+      const tr = document.createElement("tr");
+
+      const tdName = document.createElement("td");
+      tdName.className = "cellName";
+      tdName.textContent = rep.name;
+
+      const tdTwp = document.createElement("td");
+      tdTwp.appendChild(makeNumberInput(d.targetWP, "cellInput small", (v)=>{
+        d.targetWP=v;
+        const wpP = clampInt(d.targetWP);
+        if (d.wpDone + d.noShow > wpP){
+          const over = (d.wpDone + d.noShow) - wpP;
+          d.noShow = Math.max(0, d.noShow - over);
+        }
+        touch(d); onDataChanged();
+      }, "", false, isLocked));
+
+      const tdTcl = document.createElement("td");
+      tdTcl.appendChild(makeNumberInput(d.targetCloses, "cellInput small", (v)=>{ d.targetCloses=v; touch(d); onDataChanged(); }, "", false, isLocked));
+
+      const tdAmpel = document.createElement("td");
+      const tLight = trafficLight(d);
+      const warnings = rowWarnings(d);
+      tdAmpel.innerHTML = `<span class="traffic" title="Ampel basiert auf Ziel WP und Ziel Abschlüsse."><span class="dot" style="background:${tLight.color}"></span>${tLight.label}</span>`;
+      if (warnings.length){
+        tdAmpel.innerHTML += `<div class="warn" title="${escapeHtml(warnings.join(" • "))}">⚠ ${warnings.length} Hinweis(e)</div>`;
+      }
+
+      const tdWPd = document.createElement("td");
+      tdWPd.appendChild(makeNumberInput(d.wpDone, "cellInput small", (v)=>{
+        d.wpDone=v;
+        const wpP = clampInt(d.targetWP);
+        if (d.wpDone + d.noShow > wpP){
+          const over = (d.wpDone + d.noShow) - wpP;
+          d.noShow = Math.max(0, d.noShow - over);
+        }
+        if (d.actualCloses > d.wpDone) d.actualCloses = d.wpDone;
+        touch(d); onDataChanged();
+      }, "", false, isLocked));
+
+      const tdNo = document.createElement("td");
+      tdNo.appendChild(makeNumberInput(d.noShow, "cellInput small", (v)=>{
+        d.noShow=v;
+        const wpP = clampInt(d.targetWP);
+        if (d.wpDone + d.noShow > wpP){
+          const over = (d.wpDone + d.noShow) - wpP;
+          d.noShow = Math.max(0, d.noShow - over);
+        }
+        touch(d); onDataChanged();
+      }, "", false, isLocked));
+
+      const tdAct = document.createElement("td");
+      tdAct.appendChild(makeNumberInput(d.actualCloses, "cellInput small", (v)=>{
+        d.actualCloses=Math.min(v, clampInt(d.wpDone));
+        if (d.wpDeals.length > d.actualCloses) d.wpDeals = d.wpDeals.slice(0, d.actualCloses);
+        touch(d); onDataChanged();
+      }, "", false, isLocked));
+
+      const tdRev = document.createElement("td");
+      normalizeCloseDeals(d);
+      const sumRev = dealStats(d.wpDeals).netRevenue;
+      tdRev.innerHTML = `<span class="calc">${euros(sumRev)}</span>
+        <div style="margin-top:6px;">
+          <button class="linkBtn" data-action="close-details" data-rep="${rep.id}">Umsatzdetails…</button>
+        </div>`;
+
+      const tdStatus = document.createElement("td");
+      const statusSel = makeStatusSelect(d.status, "cellSelect", (v)=>{
+        if (v === "abgeschlossen"){
+          const wpP = clampInt(d.targetWP);
+          const done = clampInt(d.wpDone);
+          const ns = clampInt(d.noShow);
+          const ac = clampInt(d.actualCloses);
+          if (wpP > 0 && (done + ns === 0 || ac === 0)){
+            const ok = confirm("Status „abgeschlossen“: Es sind noch 0 bei „durchgeführt/No-Show“ oder „Ist-Abschlüsse“. Trotzdem abschließen?");
+            if (!ok){
+              statusSel.value = d.status;
+              return;
+            }
+          }
+        }
+        d.status=v; touch(d); onDataChanged();
+      });
+      tdStatus.appendChild(statusSel);
+      tdStatus.innerHTML += `<div class="note" style="margin-top:6px;">Letzte Änderung:<br><b>${fmtDateTime(d.lastUpdated)}</b></div>`;
+      tr.append(
+        tdName,
+        tdTwp, tdTcl, tdAmpel,
+        tdWPd, tdNo,
+        tdAct,
+        tdRev,
+        tdStatus
+      );
+
+      weekTableBody.appendChild(tr);
+    });
+  }
+
+  function touch(d){
+    d.lastUpdated = Date.now();
+  }
+
+  function aggregateSeries(repIdFilter){
+    const wpTarget = Array(53).fill(0);
+    const wpDone = Array(53).fill(0);
+    const noShow = Array(53).fill(0);
+    const actualCloses = Array(53).fill(0);
+    const revenue = Array(53).fill(0);
+    const cancelledRevenue = Array(53).fill(0);
+
+    for (let w=1; w<=53; w++){
+      const wk = state.weeks[String(w)] || {};
+      const repsToUse = repIdFilter ? [repIdFilter] : state.reps.map(r => r.id);
+
+      repsToUse.forEach(rid => {
+        const d = wk[rid];
+        if (!d) return;
+        ensureRepWeekData(String(w), rid);
+        const dd = wk[rid];
+
+        const wpT = clampInt(dd.targetWP);
+        const wpD = clampInt(dd.wpDone);
+        const ns = clampInt(dd.noShow);
+        const ac = clampInt(dd.actualCloses);
+
+        wpTarget[w-1] += wpT;
+        wpDone[w-1] += wpD;
+        noShow[w-1] += ns;
+        actualCloses[w-1] += ac;
+
+        normalizeCloseDeals(dd);
+        const st = dealStats(dd.wpDeals);
+        revenue[w-1] += st.netRevenue;
+        cancelledRevenue[w-1] += st.cancelledRevenue;
+      });
+    }
+
+    return { wpTarget, wpDone, noShow, actualCloses, revenue, cancelledRevenue };
+  }
+
+  function updateKPIs(repIdFilter){
+    const s = aggregateSeries(repIdFilter);
+
+    const yearWP = s.wpTarget.reduce((a,b)=>a+b,0);
+    const yearDone = s.wpDone.reduce((a,b)=>a+b,0);
+    const yearCloses = s.actualCloses.reduce((a,b)=>a+b,0);
+    const yearRev = s.revenue.reduce((a,b)=>a+b,0);
+    const yearCancelled = (s.cancelledRevenue||[]).reduce((a,b)=>a+b,0);
+
+    const showRate = yearWP > 0 ? (yearDone / yearWP) : 0;
+    const conv = yearWP > 0 ? (yearCloses / yearWP) : 0;
+
+    kpiYearWP.textContent = Math.round(yearWP).toString();
+    kpiYearDone.textContent = Math.round(yearDone).toString();
+    kpiShowRate.textContent = pct(showRate);
+    kpiYearCloses.textContent = Math.round(yearCloses).toString();
+    kpiConv.textContent = "Conversion: " + pct(conv);
+    kpiYearRevenue.textContent = euros(yearRev);
+    kpiYearRevenue.title = yearCancelled ? `Storno-Umsatz (Jahr): ${euros(yearCancelled)}` : "";
+
+    // mini panel
+    if (showMiniKpis.checked){
+      miniKpiPanel.style.display = "";
+      const { avgRpc4w, streakTargets } = computeMiniKpis(repIdFilter);
+      miniAvgRpc.textContent = `Ø €/Abschluss (4W): ${avgRpc4w !== null ? euros(avgRpc4w) : "—"}`;
+      miniStreak.textContent = `Streak Ziele: ${streakTargets !== null ? streakTargets : "—"}`;
+    } else {
+      miniKpiPanel.style.display = "none";
+    }
+  }
+
+  function computeMiniKpis(repIdFilter){
+    // Compute on last 4 weeks (relative to currently selected week)
+    const w = currentWeek;
+    const weeks = [w, w-1, w-2, w-3].filter(x => x >= 1);
+    let closes = 0;
+    let rev = 0;
+
+    weeks.forEach(ww => {
+      const wk = state.weeks[String(ww)] || {};
+      const repsToUse = repIdFilter ? [repIdFilter] : state.reps.map(r => r.id);
+      repsToUse.forEach(rid => {
+        const d = wk[rid];
+        if (!d) return;
+        normalizeCloseDeals(d);
+        const st = dealStats(d.wpDeals);
+        const hasDeals = Array.isArray(d.wpDeals) && d.wpDeals.length > 0;
+        closes += hasDeals ? st.netCount : clampInt(d.actualCloses);
+        rev += st.netRevenue;
+      });
+    });
+
+    const avgRpc4w = closes > 0 ? (rev / closes) : null;
+
+    // Streak: consecutive weeks backwards from currentWeek where targets are met (green)
+    // If no targets, streak is null.
+    let streak = 0;
+    let anyTargets = false;
+    for (let ww = currentWeek; ww >= 1; ww--){
+      const wk = state.weeks[String(ww)] || {};
+      const repsToUse = repIdFilter ? [repIdFilter] : state.reps.map(r => r.id);
+
+      // For "All sellers": treat streak as how many consecutive weeks team hit targets on average is ambiguous -> return null.
+      if (!repIdFilter) { streak = null; break; }
+
+      const d = wk[repIdFilter];
+      if (!d) { break; }
+      const hasTargets = clampInt(d.targetWP) + clampInt(d.targetCloses) + clampMoney(Number(d.targetRevenue)||0) > 0;
+      if (!hasTargets){
+        // stop: cannot determine streak without targets
+        streak = null;
+        break;
+      }
+      anyTargets = true;
+      const light = trafficLight(d);
+      if (light.label === "grün"){
+        streak += 1;
+      } else {
+        break;
+      }
+    }
+    const streakTargets = anyTargets ? streak : null;
+    return { avgRpc4w, streakTargets };
+  }
+
+  function renderCharts(){
+    const repId = sellerFocus.value || "";
+    chartScopePill.textContent = repId ? (state.reps.find(r=>r.id===repId)?.name || "Auswahl") : "Alle Verkäufer";
+
+    const labels = Array.from({length:52}, (_,i)=> `W${i+1}`);
+    const s = aggregateSeries(repId);
+
+    const ctx1 = document.getElementById("yearChart");
+    if (yearChart) yearChart.destroy();
+    yearChart = new Chart(ctx1, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "WP Ziel", data: s.wpTarget, tension: .25, borderWidth: 2, pointRadius: 0 },
+          { label: "WP durchgeführt", data: s.wpDone, tension: .25, borderWidth: 2, pointRadius: 0 },
+          { label: "No-Show", data: s.noShow, tension: .25, borderWidth: 2, pointRadius: 0 },
+          { label: "Ist-Abschlüsse", data: s.actualCloses, tension: .25, borderWidth: 2, pointRadius: 0 },
+          { label: "Umsatz (Ist, EUR)", data: s.revenue, tension: .25, borderWidth: 2, pointRadius: 0, yAxisID: "y2" },
+          { label: "Storno-Umsatz (EUR)", data: (s.cancelledRevenue||[]), tension: .25, borderWidth: 2, pointRadius: 0, yAxisID: "y2" },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { labels: { color: "#e8ecff" } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                if (ctx.dataset.label.includes("Umsatz")) return `${ctx.dataset.label}: ${euros(ctx.raw)}`;
+                return `${ctx.dataset.label}: ${Math.round(ctx.raw)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "#a9b2d6" }, grid: { color: "rgba(255,255,255,.06)" } },
+          y: { ticks: { color: "#a9b2d6" }, grid: { color: "rgba(255,255,255,.06)" } },
+          y2: {
+            position: "right",
+            ticks: { color: "#a9b2d6", callback: (v)=> euros(v) },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
+    });
+  }
+
+  function renderRanking(){
+    const rows = [];
+    state.reps.forEach(rep => {
+      const s = aggregateSeries(rep.id);
+      const totalWP = s.wpTarget.reduce((a,b)=>a+b,0);
+      const totalCl = s.actualCloses.reduce((a,b)=>a+b,0);
+      const totalRev = s.revenue.reduce((a,b)=>a+b,0);
+      const avgWP = totalWP / 52;
+      const avgCl = totalCl / 52;
+      const avgRev = totalRev / 52;
+      const conv = totalWP > 0 ? (totalCl / totalWP) : 0;
+      rows.push({ name: rep.name, avgWP, avgCl, conv, avgRev });
+    });
+
+    rows.sort((a,b)=> (b.avgRev - a.avgRev) || (b.conv - a.conv) || (b.avgCl - a.avgCl));
+
+    rankBody.innerHTML = "";
+    rows.forEach((r, idx) => {
+      const tr = document.createElement("tr");
+      const rank = idx + 1;
+      const m = medalForRank(rank);
+      tr.innerHTML = `
+        <td class="mono">${m ? (m + " ") : ""}${rank}</td>
+        <td class="rankName">${escapeHtml(r.name)}</td>
+        <td>${(Math.round(r.avgWP*10)/10).toString()}</td>
+        <td>${(Math.round(r.avgCl*10)/10).toString()}</td>
+        <td>${pct(r.conv)}</td>
+        <td>${euros(r.avgRev)}</td>
+      `;
+      rankBody.appendChild(tr);
+    });
+
+    rankPill.textContent = `${rows.length} Verkäufer`;
+  }
+
+  function renderChecklist(){
+    ensureWeek(String(currentWeek));
+    const wk = state.weeks[String(currentWeek)] || {};
+    checkList.innerHTML = "";
+
+    let open = 0;
+    state.reps.forEach(rep => {
+      ensureRepWeekData(String(currentWeek), rep.id);
+      const d = wk[rep.id];
+
+      const isClosed = d.status === "abgeschlossen";
+      if (!isClosed) open++;
+
+      const div = document.createElement("div");
+      div.className = "checkItem";
+      div.innerHTML = `
+        <div class="checkLeft">
+          <div class="checkName">${escapeHtml(rep.name)}</div>
+          <div class="checkMeta">Status: <b>${escapeHtml(labelStatus(d.status))}</b> · Letzte Änderung: <b>${escapeHtml(fmtDateTime(d.lastUpdated))}</b></div>
+        </div>
+        <div class="${isClosed ? "badgeOk" : "badgeNo"}">${isClosed ? "✅ abgeschlossen" : "❌ offen"}</div>
+      `;
+      checkList.appendChild(div);
+    });
+
+    checkPill.textContent = open === 0 ? "Alles abgeschlossen" : `${open} offen`;
+  }
+
+  function labelStatus(v){
+    const hit = STATUS_OPTIONS.find(x => x.value === v);
+    return hit ? hit.label : v;
+  }
+
+  function medalForRank(rank){
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    if (rank === 4) return "🏅";
+    if (rank === 5) return "🎖️";
+    return "";
+  }
+
+  // --- Micro-Animation: kurze "Gewonnen"-Celebration (konfetti + pop) ---
+  const fxLayer = (()=>{
+    const d = document.createElement('div');
+    d.id = 'fxLayer';
+    d.style.position = 'fixed';
+    d.style.inset = '0';
+    d.style.pointerEvents = 'none';
+    d.style.zIndex = '10000';
+    document.body.appendChild(d);
+    return d;
+  })();
+
+  function celebrateAt(el, label="Gewonnen ✅"){
+    try{
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width/2;
+      const y = r.top + r.height/2;
+      popBadge(x, y, label);
+      burstConfetti(x, y, 18);
+    }catch(e){}
+  }
+
+  function popBadge(x, y, text){
+    const n = document.createElement('div');
+    n.className = 'fxPop';
+    n.textContent = text;
+    n.style.left = x + 'px';
+    n.style.top = y + 'px';
+    fxLayer.appendChild(n);
+    setTimeout(()=> n.remove(), 900);
+  }
+
+  function burstConfetti(x, y, count){
+    const N = Math.max(8, Math.min(36, count || 18));
+    for (let i=0; i<N; i++){
+      const c = document.createElement('i');
+      c.className = 'fxConfetti';
+      c.style.left = x + 'px';
+      c.style.top = y + 'px';
+      c.style.transform = `translate(-50%, -50%) rotate(${Math.random()*360}deg)`;
+      c.style.setProperty('--dx', `${(Math.random()*2-1)*140}px`);
+      c.style.setProperty('--dy', `${- (60 + Math.random()*120)}px`);
+      c.style.setProperty('--r', `${Math.random()*360}deg`);
+      c.style.setProperty('--dur', `${520 + Math.random()*240}ms`);
+      fxLayer.appendChild(c);
+      setTimeout(()=> c.remove(), 900);
+    }
+  }
+
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function onDataChanged(){
+    saveState();
+    renderWeekTable();
+    renderChecklist();
+    updateKPIs(sellerFocus.value || "");
+    renderCharts();
+    renderRanking();
+    renderMonthSummary();
+    renderDealsPage();
+  }
+
+  // ISO week helpers for month summary
+  function isoWeekMonday(year, week){
+    // ISO week 1 is the week with Jan 4. Compute Monday of that week.
+    const jan4 = new Date(Date.UTC(year, 0, 4));
+    const day = jan4.getUTCDay() || 7; // 1..7 (Mon..Sun)
+    const mondayWeek1 = new Date(jan4);
+    mondayWeek1.setUTCDate(jan4.getUTCDate() - (day - 1));
+    const monday = new Date(mondayWeek1);
+    monday.setUTCDate(mondayWeek1.getUTCDate() + (week - 1) * 7);
+    return monday;
+  }
+  function monthWeeks(year, month1to12){
+    // Include ISO weeks that OVERLAP the selected month (not only weeks whose Monday is inside the month).
+    // This fixes boundary weeks (e.g., Woche 1 can start in Dec but belongs partly to Jan).
+    const weeks = [];
+    const start = new Date(Date.UTC(year, month1to12 - 1, 1, 0, 0, 0, 0));
+    const end = new Date(Date.UTC(year, month1to12, 0, 23, 59, 59, 999)); // last day of month
+    for (let w=1; w<=53; w++){
+      const mon = isoWeekMonday(year, w);
+      const sun = new Date(mon);
+      sun.setUTCDate(mon.getUTCDate() + 6);
+
+      // overlap check: [mon..sun] intersects [start..end]
+      if (sun < start) continue;
+      if (mon > end) continue;
+
+      weeks.push(w);
+    }
+    return weeks;
+  }
+
+  function yearWeeks(){
+    const arr = [];
+    for (let w=1; w<=53; w++) arr.push(w);
+    return arr;
+  }
+
+  function sumWeeksForRep(weeksArr, repId){
+    let wpT=0, wpD=0, ns=0, cl=0;
+    let rev=0, cancRev=0, grossRev=0;
+    let cancCount=0, grossCount=0, netCount=0;
+    weeksArr.forEach(w => {
+      const wk = state.weeks[String(w)] || {};
+      const repsToUse = repId ? [repId] : state.reps.map(r => r.id);
+      repsToUse.forEach(rid => {
+        const d = wk[rid];
+        if (!d) return;
+        ensureRepWeekData(String(w), rid);
+
+        wpT += clampInt(d.targetWP);
+        wpD += clampInt(d.wpDone);
+        ns  += clampInt(d.noShow);
+        cl  += clampInt(d.actualCloses);
+
+        normalizeCloseDeals(d);
+        const st = dealStats(d.wpDeals);
+        rev += st.netRevenue;
+        cancRev += st.cancelledRevenue;
+        grossRev += st.grossRevenue;
+        cancCount += st.cancelledCount;
+        grossCount += st.grossCount;
+        netCount += st.netCount;
+      });
+    });
+    return { wpT, wpD, ns, cl, rev, cancRev, grossRev, cancCount, grossCount, netCount };
+  }
+
+
+  function daysRemainingInScope(scope, year, month1to12){
+    const now = new Date();
+    if (scope === "year"){
+      const end = new Date(year, 11, 31, 23, 59, 59, 999);
+      const diff = end - now;
+      return Math.max(0, Math.ceil(diff / 86400000));
+    }
+    const end = new Date(year, month1to12, 0, 23, 59, 59, 999); // last day of month
+    const diff = end - now;
+    return Math.max(0, Math.ceil(diff / 86400000));
+  }
+
+  function bestMonthRevenueForRep(repId, year){
+    // best month (net revenue) within selected year (or across all data if year is not in range)
+    let best = 0;
+    for (let m=1; m<=12; m++){
+      const weeksArr = monthWeeks(year, m);
+      if (!weeksArr.length) continue;
+      const s = sumWeeksForRep(weeksArr, repId);
+      if ((s.rev||0) > best) best = s.rev||0;
+    }
+    return best;
+  }
+
+  function badgeChip(text, cls=""){
+    return `<span class="badgeChip ${cls}">${escapeHtml(text)}</span>`;
+  }
+
+  function renderPersonalPanel(scope, year, month, weeksArr, repId, rows, sums){
+    if (!personalPanel) return;
+
+    if (!repId){
+      personalPanel.style.display = "none";
+      if (psSparkChart){ try{ psSparkChart.destroy(); }catch(e){} psSparkChart = null; }
+      return;
+    }
+    personalPanel.style.display = "";
+    if (personalScopePill) personalScopePill.textContent = scope === "year" ? "Jahr" : "Monat";
+
+    // Rankings based on current rows: revenue primary (sales wants money)
+    const sortedRev = rows.slice().sort((a,b)=> (b.rev||0) - (a.rev||0));
+    const myIdx = sortedRev.findIndex(x => x.id === repId);
+    const rank = myIdx >= 0 ? (myIdx + 1) : null;
+    const medal = rank ? medalForRank(rank) : "";
+    const total = sortedRev.length;
+
+    if (psRank){
+      psRank.textContent = rank ? `Platz ${rank} ${medal} (Umsatz)` : "—";
+    }
+
+    // Gap to next rank
+    let gapTxt = "—";
+    if (rank && rank > 1){
+      const above = sortedRev[rank-2];
+      const my = sortedRev[rank-1];
+      const diff = (above.rev||0) - (my.rev||0);
+      gapTxt = diff > 0
+        ? `Zum nächsten Platz fehlen dir ${euros(diff)} Umsatz.`
+        : "Du bist bereits vorne dabei.";
+    } else if (rank === 1){
+      gapTxt = `Du führst das Ranking an. Halte den Vorsprung!`;
+    } else if (rank && rank > 0){
+      gapTxt = `Noch keine Umsätze erfasst? Eintragen lohnt sich – es zählt sofort im Ranking.`;
+    }
+    if (psGap) psGap.textContent = gapTxt;
+
+    // Badges (wenige, „wertige“)
+    const badges = [];
+
+    // Top badges
+    if (rank === 1) badges.push(badgeChip("Top Umsatz", "good"));
+    if (rank === 2) badges.push(badgeChip("Jäger #1", "warn"));
+
+    // Show rate badge
+    const showRate = sums.wpT > 0 ? (sums.wpD / sums.wpT) : 0;
+    if (sums.wpT >= 10 && showRate >= 1) badges.push(badgeChip("100% Show-Rate (≥10)", "good"));
+
+    // Streak from week KPIs (existing helper)
+    const { streakTargets } = computeMiniKpis(repId);
+    if (typeof streakTargets === "number" && streakTargets >= 3) badges.push(badgeChip(`Streak: ${streakTargets} Wochen Ziel`, "good"));
+
+    // Personal record (month revenue best within year)
+    if (scope === "month"){
+      const best = bestMonthRevenueForRep(repId, year);
+      if ((sums.rev||0) >= best && (sums.rev||0) > 0) badges.push(badgeChip("Rekord-Monat", "good"));
+    }
+
+    if (psBadges){
+      psBadges.innerHTML = badges.length ? badges.join("") : badgeChip("Fokus: Eintragen → sichtbar werden", "");
+    }
+
+    // Next action hint: goal remaining (from targets), or simple suggestion
+    if (psNextAction){
+      let next = "";
+      try{
+        ensureTargets();
+        if (scope === "month"){
+          const mKey = monthKey();
+          const mt = getMonthTargets(repId, mKey);
+          const actual = monthActualsForRep(weeksArr, repId);
+          const remC = (mt.closes||0) - (actual.closes||0);
+          const remT = (mt.terms||0) - (actual.terms||0);
+          if ((mt.closes||0) > 0 || (mt.terms||0) > 0){
+            const parts=[];
+            if ((mt.closes||0)>0) parts.push(`${Math.max(0, remC)} Abschluss${Math.max(0, remC)===1?"":"e"} offen`);
+            if ((mt.terms||0)>0) parts.push(`${Math.max(0, remT)} Termin${Math.max(0, remT)===1?"":"e"} offen`);
+            next = `🎯 Bis zum Monatsziel: ${parts.join(" · ")}.`;
+          }
+        } else {
+          const yKey = yearKey();
+          const yt = getYearTargets(repId, yKey);
+          const actualY = yearActualClosesForRep(repId);
+          if ((yt.closes||0) > 0){
+            const rem = Math.max(0, (yt.closes||0) - (actualY||0));
+            next = `🎯 Bis zum Jahresziel: ${rem} Abschluss${rem===1?"":"e"} offen.`;
+          }
+        }
+      }catch(e){}
+      if (!next){
+        next = `✅ Tipp: Erfasse Abschlüsse direkt nach dem Gespräch – das aktualisiert Ranking & Ziele sofort.`;
+      }
+      psNextAction.textContent = next;
+    }
+
+    // Time pressure hint
+    if (psTimePressure){
+      const days = daysRemainingInScope(scope, year, month);
+      if (scope === "year"){
+        psTimePressure.textContent = days ? `⏳ Noch ${days} Tage bis Jahresende.` : "⏳ Jahresende erreicht.";
+      } else {
+        psTimePressure.textContent = days ? `⏳ Noch ${days} Tage im Monat.` : "⏳ Monatsende erreicht.";
+      }
+    }
+
+    // Sparkline: revenue over weeks in scope
+    if (psSpark){
+      const labels = weeksArr.map(w => `W${w}`);
+      const vals = weeksArr.map(w => {
+        const wk = state.weeks[String(w)] || {};
+        const d = wk[repId];
+        if (!d) return 0;
+        normalizeCloseDeals(d);
+        return dealStats(d.wpDeals).netRevenue || 0;
+      });
+
+      if (psSparkChart){ try{ psSparkChart.destroy(); }catch(e){} }
+      psSparkChart = new Chart(psSpark, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{ label: "Umsatz", data: vals, tension: .3, borderWidth: 2, pointRadius: 0 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display:false }, tooltip: { callbacks:{ label:(c)=> euros(c.raw) } } },
+          scales: {
+            x: { display:false },
+            y: { display:false }
+          }
+        }
+      });
+    }
+  }
+
+  function renderMonthSummary(){
+    const year = Number(yearSelect.value);
+    const month = Number(monthSelect.value);
+    const scope = (periodSelect && periodSelect.value === "year") ? "year" : "month";
+
+    // UI: month select only relevant in Monat-Ansicht
+    if (monthSelect){
+      monthSelect.disabled = scope === "year";
+      const wrap = monthSelect.closest("div");
+      if (wrap){
+        wrap.style.opacity = scope === "year" ? "0.55" : "";
+        wrap.style.pointerEvents = scope === "year" ? "none" : "";
+      }
+    }
+
+    const weeksArr = scope === "year" ? yearWeeks() : monthWeeks(year, month);
+
+    // Vorperiode für Trend (Monat -> Vormonat, Jahr -> Vorjahr)
+    let prevWeeksArr = [];
+    let prevLabel = "";
+    if (scope === "year"){
+      prevWeeksArr = yearWeeks();
+      prevLabel = `vs. ${year-1}`;
+    } else {
+      let py = year, pm = month - 1;
+      if (pm <= 0){ pm = 12; py = year - 1; }
+      prevWeeksArr = monthWeeks(py, pm);
+      prevLabel = `vs. ${monthNames[pm-1]} ${py}`;
+    }
+
+    // Labels
+    if (monthPill){
+      monthPill.textContent = scope === "year" ? `Jahr ${year}` : `${monthNames[month-1]} ${year}`;
+    }
+    if (monthWeeksPill){
+      monthWeeksPill.textContent = scope === "year"
+        ? "Wochen: 1–52"
+        : (weeksArr.length ? `Wochen: ${weeksArr.join(", ")}` : "Wochen: —");
+    }
+    // Update scope pills
+    document.querySelectorAll(".scopePill").forEach(el => { el.textContent = scope === "year" ? "Jahr" : "Monat"; });
+    if (mScopeLabel) mScopeLabel.textContent = scope === "year" ? "Jahr" : "Monat";
+
+    const repId = sellerFocus.value || "";
+    const sums = sumWeeksForRep(weeksArr, repId || null);
+
+    const prevSums = prevWeeksArr.length ? sumWeeksForRep(prevWeeksArr, repId || null) : { wpT:0, wpD:0, cl:0, rev:0 };
+
+    function setDelta(el, diff, formatter){
+      if (!el) return;
+      const v = Number(diff||0);
+      if (!Number.isFinite(v) || v === 0){
+        el.style.display = "none";
+        el.className = "delta";
+        return;
+      }
+      const up = v > 0;
+      el.style.display = "inline-flex";
+      el.className = "delta " + (up ? "up" : "down");
+      el.textContent = `${up ? "▲" : "▼"} ${formatter(Math.abs(v))} ${prevLabel}`;
+    }
+
+    const showRate = sums.wpT > 0 ? (sums.wpD / sums.wpT) : 0;
+    const conv = sums.wpT > 0 ? (sums.cl / sums.wpT) : 0;
+
+    mWP.textContent = Math.round(sums.wpT).toString();
+    mDone.textContent = Math.round(sums.wpD).toString();
+    mShow.textContent = "Show-Rate: " + pct(showRate);
+    mCloses.textContent = Math.round(sums.cl).toString();
+    mConv.textContent = "Conversion: " + pct(conv);
+    mRev.textContent = euros(sums.rev);
+    if (mFc) mFc.textContent = "";
+
+    // Trends
+    setDelta(dWP, (sums.wpT||0) - (prevSums.wpT||0), (x)=> String(Math.round(x)));
+    setDelta(dDone, (sums.wpD||0) - (prevSums.wpD||0), (x)=> String(Math.round(x)));
+    setDelta(dCl, (sums.cl||0) - (prevSums.cl||0), (x)=> String(Math.round(x)));
+    setDelta(dRev, (sums.rev||0) - (prevSums.rev||0), (x)=> euros(x));
+
+    // Storno (Anzahl + Quote, optional stornierten Umsatz)
+    if (mStorno){
+      const gross = sums.grossCount || 0;
+      const canc = sums.cancCount || 0;
+      const q = gross > 0 ? (canc / gross) : 0;
+      const cancRev = sums.cancRev || 0;
+      mStorno.textContent = `Storno: ${canc}/${gross} (${pct(q)}) · ${euros(cancRev)}`;
+
+    // KPI-Callouts: „Was fehlt noch?“ (macht die Zahlen handlungsorientiert)
+    try{
+      ensureTargets();
+      if (scope === "month"){
+        const mKey = monthKey();
+        // Team- oder Einzelansicht
+        if (repId){
+          const mt = getMonthTargets(repId, mKey);
+          const a = monthActualsForRep(weeksArr, repId);
+          const remT = Math.max(0, (mt.terms||0) - (a.terms||0));
+          const remC = Math.max(0, (mt.closes||0) - (a.closes||0));
+
+          if (mCalloutWP){
+            if ((mt.terms||0) > 0){
+              mCalloutWP.style.display = "";
+              mCalloutWP.textContent = remT === 0 ? "✅ Monatsziel Termine erreicht." : `🎯 Noch ${remT} Termin${remT===1?"":"e"} bis zum Monatsziel.`;
+            } else {
+              mCalloutWP.style.display = "none";
+            }
+          }
+          if (mCalloutCl){
+            if ((mt.closes||0) > 0){
+              mCalloutCl.style.display = "";
+              mCalloutCl.textContent = remC === 0 ? "✅ Monatsziel Abschlüsse erreicht." : `🎯 Noch ${remC} Abschluss${remC===1?"":"e"} bis zum Monatsziel.`;
+            } else {
+              mCalloutCl.style.display = "none";
+            }
+          }
+        } else {
+          // Team: Summe Ziele vs. Ist
+          let tTerms=0, tCloses=0, aTerms=0, aCloses=0;
+          state.reps.forEach(r=>{
+            const mt = getMonthTargets(r.id, mKey);
+            const a = monthActualsForRep(weeksArr, r.id);
+            tTerms += (mt.terms||0); tCloses += (mt.closes||0);
+            aTerms += (a.terms||0); aCloses += (a.closes||0);
+          });
+          if (mCalloutWP){
+            if (tTerms > 0){
+              const rem = Math.max(0, tTerms - aTerms);
+              mCalloutWP.style.display = "";
+              mCalloutWP.textContent = rem===0 ? "✅ Team-Ziel Termine erreicht." : `🎯 Team: Noch ${rem} Termin${rem===1?"":"e"} bis zum Ziel.`;
+            } else mCalloutWP.style.display = "none";
+          }
+          if (mCalloutCl){
+            if (tCloses > 0){
+              const rem = Math.max(0, tCloses - aCloses);
+              mCalloutCl.style.display = "";
+              mCalloutCl.textContent = rem===0 ? "✅ Team-Ziel Abschlüsse erreicht." : `🎯 Team: Noch ${rem} Abschluss${rem===1?"":"e"} bis zum Ziel.`;
+            } else mCalloutCl.style.display = "none";
+          }
+        }
+      } else {
+        // Jahr: sinnvoll nur Abschlüsse (Jahresziel)
+        if (mCalloutWP) mCalloutWP.style.display = "none";
+        if (mCalloutCl){
+          if (repId){
+            const yt = getYearTargets(repId, yearKey());
+            const ay = yearActualClosesForRep(repId);
+            if ((yt.closes||0) > 0){
+              const rem = Math.max(0, (yt.closes||0) - (ay||0));
+              mCalloutCl.style.display = "";
+              mCalloutCl.textContent = rem===0 ? "✅ Jahresziel Abschlüsse erreicht." : `🎯 Noch ${rem} Abschluss${rem===1?"":"e"} bis zum Jahresziel.`;
+            } else mCalloutCl.style.display = "none";
+          } else mCalloutCl.style.display = "none";
+        }
+      }
+
+      if (mCalloutRev){
+        mCalloutRev.style.display = "";
+        mCalloutRev.textContent = repId ? "💡 Umsatz zählt sofort im Ranking – trage Abschlüsse zeitnah ein." : "💡 Tipp: Je früher eingetragen, desto klarer das Bild im Team.";
+      }
+    }catch(e){
+      if (mCalloutWP) mCalloutWP.style.display = "none";
+      if (mCalloutCl) mCalloutCl.style.display = "none";
+      if (mCalloutRev) mCalloutRev.style.display = "none";
+    }
+
+    }
+
+    // Top-Listen (nur sinnvoll ohne Filter "Alle Verkäufer"? -> wir zeigen sie immer pro Monat, aber nach aktuellem Filter)
+    const rows = [];
+    const repsToUse = repId ? state.reps.filter(r => r.id === repId) : state.reps.slice();
+
+    repsToUse.forEach(r => {
+      const s = sumWeeksForRep(weeksArr, r.id);
+      rows.push({ id: r.id, name: r.name, wpP: s.wpT, wpD: s.wpD, cl: s.cl, rev: s.rev });
+    });
+
+    renderMonthRanking(rows);
+
+    // Top 5 Umsatz
+    const topByRev = rows.slice().sort((a,b)=> (b.rev||0) - (a.rev||0)).slice(0,5);
+    if (topRev) topRev.innerHTML = renderTopList(topByRev, r => euros(r.rev));
+
+    // Top 5 Abschlüsse
+    const topByCl = rows.slice().sort((a,b)=> (b.cl||0) - (a.cl||0)).slice(0,5);
+    if (topCl) topCl.innerHTML = renderTopList(topByCl, r => String(Math.round(r.cl||0)));
+
+    // Top 5 Termine (durchgeführt)
+    const topByWp = rows.slice().sort((a,b)=> (b.wpD||0) - (a.wpD||0)).slice(0,5);
+    if (topWp) topWp.innerHTML = renderTopList(topByWp, r => String(Math.round(r.wpD||0)));
+
+    // Personal Panel
+    renderPersonalPanel(scope, year, month, weeksArr, repId, rows, sums);
+
+    // Most Improved (einfach: Differenz Umsatz vs. Vormonat, nur bei Gesamtansicht)
+    if (mostImproved){
+      if (scope !== "month"){
+        mostImproved.textContent = "—";
+      } else {
+        const prevMonth = month === 1 ? 12 : (month - 1);
+        const prevYear = month === 1 ? (year - 1) : year;
+        const prevWeeks = monthWeeks(prevYear, prevMonth);
+
+        if (!prevWeeks.length || !weeksArr.length || repId){
+          mostImproved.textContent = "—";
+        } else {
+          const diffs = state.reps.map(r => {
+            const cur = sumWeeksForRep(weeksArr, r.id).rev;
+            const prev = sumWeeksForRep(prevWeeks, r.id).rev;
+            const diff = (cur||0) - (prev||0);
+            const base = (prev||0);
+            const diffPct = base > 0 ? diff / base : 0;
+            return { name: r.name, diff, diffPct };
+          }).sort((a,b)=> (b.diff||0) - (a.diff||0));
+
+          if (!diffs.length || diffs[0].diff === 0){
+            mostImproved.textContent = "—";
+          } else {
+            const best = diffs[0];
+            mostImproved.innerHTML = `<b>${escapeHtml(best.name)}</b>: ${best.diff>=0?"+":""}${euros(best.diff)} (${pct(best.diffPct)})`;
+          }
+        }
+      }
+    }
+
+    // Zielerreichung (WP): Termine & Abschlüsse
+    if (scope === "year") renderYearGoals(weeksArr);
+    else renderMonthGoals(weeksArr);
+  }
+
+
+  function renderTopList(rows, rightFn){
+    if (!rows.length) return `<div class="note">Keine Daten.</div>`;
+    const items = rows.map((r, idx) => {
+      const rank = idx + 1;
+      return `<div class="checkItem topItem topItem-${rank}" style="margin-bottom:8px;">
+        <div class="checkLeft">
+          <div class="checkName"><span class="rankNum">${rank}.</span><span class="medal">${medalForRank(rank)}</span>${escapeHtml(r.name)}</div>
+          <div class="checkMeta">WP: ${Math.round(r.wpP)} · Abschlüsse: ${Math.round(r.cl)} · Show: ${pct(r.wpP>0?r.wpD/r.wpP:0)}${(typeof r.diffRev === "number") ? ` · Δ Umsatz: ${r.diffRev>=0?"+":""}${euros(r.diffRev)} (${pct(r.diffPct)})` : ""}</div>
+        </div>
+        <div class="badgeOk">${escapeHtml(rightFn(r))}</div>
+      </div>`;
+    }).join("");
+    return items;
+  }
+
+
+  function renderMonthRanking(rows){
+    if (!monthRankBody) return;
+
+    if (!Array.isArray(rows) || rows.length === 0){
+      monthRankBody.innerHTML = `<tr><td colspan="5" style="padding:12px; color: var(--muted); font-weight:1000;">Keine Daten.</td></tr>`;
+      return;
+    }
+
+    const sorted = rows.slice().sort((a,b) => {
+      const cl = (b.cl||0) - (a.cl||0);
+      if (cl !== 0) return cl;
+      const wp = (b.wpD||0) - (a.wpD||0);
+      if (wp !== 0) return wp;
+      return (b.rev||0) - (a.rev||0);
+    });
+
+    monthRankBody.innerHTML = sorted.map((r, idx) => `
+      <tr>
+        <td class=\"mono\">${(medalForRank(idx+1) ? (medalForRank(idx+1) + ' ') : '') + (idx+1)}</td>
+        <td class="rankName">${escapeHtml(r.name)}</td>
+        <td class="mono">${Math.round(r.wpD||0)}</td>
+        <td class="mono">${Math.round(r.cl||0)}</td>
+        <td class="mono">${euros(r.rev||0)}</td>
+      </tr>
+    `).join("");
+  }
+
+
+  // ---- Kalender-Import (.ics) ----
+  // Hinweis: Aus Datenschutz-/Technikgründen kann diese Offline-HTML keine Kalender direkt per OAuth „anzapfen“.
+  // Stattdessen: .ics Export importieren (Google/Outlook).
+  // Zuordnung (einfach, anpassbar):
+  // - Wenn SUMMARY/DESCRIPTION "wärmepumpe"/"waermepumpe" oder "wp" enthält -> WP geplant (wpPlanned++)
+  // Falls ein Termin nur PV enthält (ohne WP), wird er zusätzlich als WP geplant gezählt (PV ist Zusatz/Teilmenge).
+  function parseICSText(icsText){
+    const lines = icsText.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
+    const events = [];
+    let cur = null;
+
+    function unfold(ls){
+      const out = [];
+      for (const ln of ls){
+        if (ln.startsWith(" ") || ln.startsWith("\t")){
+          if (out.length) out[out.length-1] += ln.slice(1);
+        } else out.push(ln);
+      }
+      return out;
+    }
+
+    const L = unfold(lines);
+
+    for (const ln of L){
+      if (ln === "BEGIN:VEVENT"){ cur = {}; continue; }
+      if (ln === "END:VEVENT"){
+        if (cur && cur.dtstart) events.push(cur);
+        cur = null; continue;
+      }
+      if (!cur) continue;
+
+      const idx = ln.indexOf(":");
+      if (idx < 0) continue;
+      const keyRaw = ln.slice(0, idx);
+      const val = ln.slice(idx+1);
+      const key = keyRaw.split(";")[0].toUpperCase();
+
+      if (key === "DTSTART"){
+        cur.dtstart = val.trim();
+      } else if (key === "SUMMARY"){
+        cur.summary = val.trim();
+      } else if (key === "DESCRIPTION"){
+        cur.description = val.trim();
+      }
+    }
+    return events;
+  }
+
+  function parseICSDate(dt){
+    const s = String(dt || "").trim();
+    if (!s) return null;
+    if (/^\d{8}$/.test(s)){
+      const y = Number(s.slice(0,4));
+      const m = Number(s.slice(4,6));
+      const d = Number(s.slice(6,8));
+      return new Date(Date.UTC(y, m-1, d));
+    }
+    const m = s.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/);
+    if (m){
+      const y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);
+      const hh = Number(m[4]), mi = Number(m[5]), ss = Number(m[6]);
+      if (m[7] === "Z") return new Date(Date.UTC(y, mo-1, da, hh, mi, ss));
+      return new Date(y, mo-1, da, hh, mi, ss);
+    }
+    return null;
+  }
+
+  function isoWeekNumber(date){
+    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return { year: d.getUTCFullYear(), week: weekNo };
+  }
+
+  function applyICSCounts(countsByWeek){
+    // countsByWeek: { [week]: { wp: n, pv: n } } for selected year
+    Object.keys(countsByWeek).forEach(wk => {
+      const w = String(wk);
+      if (Number(w) < 1 || Number(w) > 52) return;
+      ensureWeek(w);
+
+      // Import-Ziel:
+      // - Wenn oben ein Verkäufer gefiltert ist: in diesen importieren
+      // - Sonst in einen Sammel-Verkäufer "Kalender Import"
+      let targetRepId = sellerFocus.value || "";
+      if (!targetRepId){
+        let special = state.reps.find(r => r.name === "Kalender Import");
+        if (!special){
+          special = { id: uid(), name: "Kalender Import" };
+          state.reps.push(special);
+        }
+        targetRepId = special.id;
+      }
+
+      ensureRepWeekData(w, targetRepId);
+      const d = state.weeks[w][targetRepId];
+      d.targetWP = clampInt(d.targetWP) + clampInt(countsByWeek[wk].wp || 0);
+      touch(d);
+    });
+  }
+
+  async function importICSFile(file){
+    const txt = await file.text();
+    const evs = parseICSText(txt);
+    const selectedYear = Number(yearSelect.value);
+    const counts = {};
+    for (const e of evs){
+      const dt = parseICSDate(e.dtstart);
+      if (!dt) continue;
+      const iw = isoWeekNumber(dt);
+      if (iw.year !== selectedYear) continue;
+      if (iw.week < 1 || iw.week > 53) continue;
+
+      const blob = ((e.summary||"") + " " + (e.description||"")).toLowerCase();
+      const isPV = blob.includes("photovoltaik") || blob.includes(" pv ") || blob.endsWith(" pv") || blob.startsWith("pv ") || blob.includes("pv-");
+      const isWP = blob.includes("wärmepumpe") || blob.includes("waermepumpe") || blob.includes(" wärmepump") || blob.includes(" wp ") || blob.startsWith("wp ");
+
+      if (!counts[iw.week]) counts[iw.week] = { wp:0, pv:0 };
+      if (isWP) counts[iw.week].wp += 1;
+      if (isPV) counts[iw.week].pv += 1;
+      if (!isWP && isPV){
+        counts[iw.week].wp += 1;
+      }
+    }
+    applyICSCounts(counts);
+    saveState();
+    renderAll();
+
+    const totalImported = Object.values(counts).reduce((a,x)=>a + (x.wp||0) + (x.pv||0), 0);
+    icsPill.textContent = totalImported ? `importiert: ${totalImported}` : "keine Treffer";
+    alert("Kalender-Import abgeschlossen. Hinweis: Zuordnung basiert auf Schlüsselwörtern (WP/PV) im Termintext.");
+  }
+
+
+
+  function updateDeadlineBanner(){
+    // Simple "Deadline-Modus" based on weekday (local)
+    const d = new Date();
+    const day = d.getDay(); // 0 Sun .. 6 Sat
+    // Sunday (0): planning for next week; Sat/Sun: actuals/closing
+    // We'll show always, but text changes.
+    let msg = "";
+    if (day === 0){
+      msg = `Heute ist Sonntag (${d.toLocaleDateString("de-DE")}). Empfehlung: Planung für Folgewoche eintragen (Ziele, WP, PV-Zusatz, Plan-Abschlüsse, €/Abschluss).`;
+    } else if (day === 6){
+      msg = `Heute ist Samstag (${d.toLocaleDateString("de-DE")}). Empfehlung: Ist-Werte ergänzen (durchgeführt/No-Show, Ist-Abschlüsse) und Woche abschließen.`;
+    } else if (day === 5){
+      msg = `Heute ist Freitag (${d.toLocaleDateString("de-DE")}). Reminder: Woche vorbereiten, offene Punkte schließen, Forecast prüfen.`;
+    } else {
+      msg = `Aktuelle Woche ${currentWeek}: Bitte Status aktuell halten (in Arbeit/abgeschlossen).`;
+    }
+    deadlineText.innerHTML = `<b>Hinweis</b>: ${escapeHtml(msg)}`;
+    deadlineBanner.style.display = "";
+  }
+
+  function openMeetingView(){
+    const year = Number(yearSelect.value);
+    const month = Number(monthSelect.value);
+    const scope = (periodSelect && periodSelect.value === "year") ? "year" : "month";
+    meetingTitle.textContent = scope === "year" ? `Meeting-Ansicht – Jahr ${year}` : `Meeting-Ansicht – ${monthNames[month-1]} ${year}`;
+    meetingWeekPill.textContent = `Woche ${currentWeek}`;
+    // KPIs from existing month summary values
+    meetingKpis.innerHTML = `
+      <div class="kpi"><div class="t">WP geplant</div><div class="v">${escapeHtml(mWP.textContent)}</div><div class="s">${scope==="year"?"Jahr":"Monat"}</div></div>
+      <div class="kpi"><div class="t">WP durchgeführt</div><div class="v">${escapeHtml(mDone.textContent)}</div><div class="s">${escapeHtml(mShow.textContent)}</div></div>
+      <div class="kpi"><div class="t">Abschlüsse</div><div class="v">${escapeHtml(mCloses.textContent)}</div><div class="s">${escapeHtml(mConv.textContent)}</div></div>
+      <div class="kpi"><div class="t">Umsatz (Ist)</div><div class="v">${escapeHtml(mRev.textContent)}</div><div class="s">${escapeHtml(mFc.textContent)}</div></div>
+      <div class="s">Teilmenge</div></div>
+    `;
+    meetingTopRev.innerHTML = topRev.innerHTML;
+    meetingTopCl.innerHTML = topCl.innerHTML;
+    meetingMostImproved.innerHTML = mostImproved.innerHTML;
+    meetingChecklist.innerHTML = checkList.innerHTML;
+
+    meetingModal.style.display = "flex";
+  }
+
+  function closeModal(el){ el.style.display = "none"; }
+
+  
+  function parseMoneyInput(val){
+    const ln = String(val||"").trim();
+    if (!ln) return 0;
+    const cleaned = ln.replace(/\./g,"").replace(/,/g,".").replace(/[^\d.]/g,"");
+    const v = Number(cleaned);
+    if (!Number.isFinite(v) || v < 0) return 0;
+    return Math.round(v*100)/100;
+  }
+
+  function normalizeCloseDeals(d){
+    // Migration: alte Variante = Array<number> => [{kunde:"", typ:"", umsatz:number, status:"aktiv|storniert", cancelledOn:"YYYY-MM-DD", cancelReason:""}]
+    if (!Array.isArray(d.wpDeals)) d.wpDeals = [];
+    if (d.wpDeals.length && typeof d.wpDeals[0] === "number"){
+      d.wpDeals = d.wpDeals.map(v => ({ kunde:"", typ:"", umsatz: clampMoney(Number(v)||0), status:"aktiv", cancelledOn:"", cancelReason:"" }));
+    }
+    // Ensure fields & migrate older shapes
+    d.wpDeals.forEach(deal => {
+      if (!deal || typeof deal !== "object") return;
+      if (typeof deal.kunde !== "string") deal.kunde = String(deal.kunde || "");
+      if (typeof deal.typ !== "string") deal.typ = String(deal.typ || "");
+      deal.umsatz = clampMoney(Number(deal.umsatz) || 0);
+
+      // migrate older flags
+      if (deal.cancelled === true && !deal.status) deal.status = "storniert";
+      if (!deal.status) deal.status = "aktiv";
+      if (deal.status !== "aktiv" && deal.status !== "storniert") deal.status = "aktiv";
+
+      if (typeof deal.cancelledOn !== "string") deal.cancelledOn = String(deal.cancelledOn || "");
+      if (typeof deal.cancelReason !== "string") deal.cancelReason = String(deal.cancelReason || "");
+      delete deal.cancelled;
+    });
+  }
+
+  function dealIsCancelled(deal){
+    return !!deal && typeof deal === "object" && String(deal.status||"").toLowerCase() === "storniert";
+  }
+  function dealNetAmount(deal){
+    return dealIsCancelled(deal) ? 0 : clampMoney(Number(deal?.umsatz)||0);
+  }
+  function dealCancelAmount(deal){
+    return dealIsCancelled(deal) ? clampMoney(Number(deal?.umsatz)||0) : 0;
+  }
+  function dealStats(deals){
+    const arr = Array.isArray(deals) ? deals : [];
+    let grossRevenue = 0, netRevenue = 0, cancelledRevenue = 0;
+    let grossCount = 0, netCount = 0, cancelledCount = 0;
+    arr.forEach(x => {
+      if (!x || typeof x !== "object") return;
+      grossCount += 1;
+      const amt = clampMoney(Number(x?.umsatz)||0);
+      grossRevenue += amt;
+      if (dealIsCancelled(x)){
+        cancelledCount += 1;
+        cancelledRevenue += amt;
+      } else {
+        netCount += 1;
+        netRevenue += amt;
+      }
+    });
+    return { grossRevenue, netRevenue, cancelledRevenue, grossCount, netCount, cancelledCount };
+  }
+
+
+  function openCloseDetailModal(week, repId, repName){
+    ensureRepWeekData(String(week), repId);
+    const d = state.weeks[String(week)][repId];
+    normalizeCloseDeals(d);
+
+    closeCtx = { week: String(week), repId };
+    closeDetailTitle.textContent = `Abschlussdetails – ${repName} (Woche ${week})`;
+
+    renderCloseDetailList();
+    closeDetailModal.style.display = "flex";
+  }
+
+  function renderCloseDetailList(){
+    const { week, repId } = closeCtx;
+    if (!week || !repId) return;
+    const d = state.weeks[week][repId];
+    normalizeCloseDeals(d);
+
+    const n = clampInt(d.actualCloses);
+    if (d.wpDeals.length > n) d.wpDeals = d.wpDeals.slice(0, n);
+    while (d.wpDeals.length < n) d.wpDeals.push({ kunde:"", typ:"", umsatz: 0, status:"aktiv", cancelledOn:"", cancelReason:"" });
+
+    closeDetailList.innerHTML = "";
+
+    for (let i=0; i<n; i++){
+      const deal = d.wpDeals[i];
+
+      const row = document.createElement("div");
+      row.className = "dealRow";
+
+      const idx = document.createElement("div");
+      idx.className = "idx";
+      idx.textContent = `Abschluss ${i+1}`;
+
+      const inpK = document.createElement("input");
+      inpK.type = "text";
+      inpK.placeholder = "Kundenname";
+      inpK.value = deal.kunde || "";
+      inpK.addEventListener("input", ()=> { deal.kunde = inpK.value; });
+
+      const inpT = document.createElement("input");
+      inpT.type = "text";
+      inpT.placeholder = "Wärmepumpentyp";
+      inpT.value = deal.typ || "";
+      inpT.addEventListener("input", ()=> { deal.typ = inpT.value; });
+
+      const inpU = document.createElement("input");
+      inpU.type = "number";
+      inpU.min = "0";
+      inpU.step = "0.01";
+      inpU.placeholder = "Umsatz €";
+      inpU.value = String(clampMoney(Number(deal.umsatz)||0));
+      inpU.addEventListener("change", ()=> {
+        deal.umsatz = clampMoney(Number(inpU.value)||0);
+        inpU.value = String(deal.umsatz);
+        updateCloseDetailSummary();
+      });
+
+      row.appendChild(idx);
+      row.appendChild(inpK);
+      row.appendChild(inpT);
+      row.appendChild(inpU);
+
+      // Storno markieren (nachträglich möglich)
+      const meta = document.createElement("div");
+      meta.style.display = "flex";
+      meta.style.gap = "8px";
+      meta.style.alignItems = "center";
+      meta.style.flexWrap = "wrap";
+
+      const lbl = document.createElement("label");
+      lbl.style.display = "flex";
+      lbl.style.alignItems = "center";
+      lbl.style.gap = "6px";
+      lbl.style.fontSize = "12px";
+      lbl.style.color = "var(--muted)";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = dealIsCancelled(deal);
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode("Storno"));
+
+      const inpDate = document.createElement("input");
+      inpDate.type = "date";
+      inpDate.value = (deal.cancelledOn || "");
+      inpDate.style.maxWidth = "150px";
+
+      const inpR = document.createElement("input");
+      inpR.type = "text";
+      inpR.placeholder = "Storno-Grund (optional)";
+      inpR.value = deal.cancelReason || "";
+
+      function syncMetaVisibility(){
+        const on = cb.checked;
+        inpDate.style.display = on ? "" : "none";
+        inpR.style.display = on ? "" : "none";
+      }
+      syncMetaVisibility();
+
+      cb.addEventListener("change", ()=> {
+        deal.status = cb.checked ? "storniert" : "aktiv";
+        if (cb.checked && !deal.cancelledOn){
+          const t = new Date();
+          const yyyy = t.getFullYear();
+          const mm = String(t.getMonth()+1).padStart(2,"0");
+          const dd = String(t.getDate()).padStart(2,"0");
+          deal.cancelledOn = `${yyyy}-${mm}-${dd}`;
+          inpDate.value = deal.cancelledOn;
+        }
+        if (!cb.checked){
+          deal.cancelledOn = "";
+          deal.cancelReason = "";
+          inpDate.value = "";
+          inpR.value = "";
+        }
+        syncMetaVisibility();
+        updateCloseDetailSummary();
+      });
+
+      inpDate.addEventListener("change", ()=> {
+        deal.cancelledOn = String(inpDate.value || "");
+        updateCloseDetailSummary();
+      });
+
+      inpR.addEventListener("input", ()=> { deal.cancelReason = inpR.value; });
+
+      meta.appendChild(lbl);
+      meta.appendChild(inpDate);
+      meta.appendChild(inpR);
+      row.appendChild(meta);
+
+      closeDetailList.appendChild(row);
+    }
+
+    updateCloseDetailSummary();
+  }
+
+  function updateCloseDetailSummary(){
+    const { week, repId } = closeCtx;
+    if (!week || !repId) return;
+    const d = state.weeks[week][repId];
+    normalizeCloseDeals(d);
+
+    const st = dealStats(d.wpDeals);
+    const rateCount = st.grossCount > 0 ? (st.cancelledCount / st.grossCount) : 0;
+    closeDetailSumPill.textContent = `Summe (netto): ${euros(st.netRevenue)}`;
+    closeDetailCountPill.textContent = `Abschlüsse (netto): ${st.netCount}`;
+    if (closeDetailStornoPill){
+      closeDetailStornoPill.textContent = `Storno: ${st.cancelledCount}/${st.grossCount} (${pct(rateCount)}) · ${euros(st.cancelledRevenue)}`;
+    }
+  }
+
+function monthKey(){
+  const y = String(yearSelect?.value || new Date().getFullYear());
+  const m = String(monthSelect?.value || (new Date().getMonth()+1)).padStart(2,"0");
+  return `${y}-${m}`;
+}
+function yearKey(){
+  return String(yearSelect?.value || new Date().getFullYear());
+}
+function ensureTargets(){
+  state.targets ||= { months:{}, years:{} };
+  state.targets.months ||= {};
+  state.targets.years ||= {};
+}
+function getMonthTargets(repId, key){
+  ensureTargets();
+  state.targets.months[key] ||= {};
+  state.targets.months[key][repId] ||= { terms: 0, closes: 0 };
+  const t = state.targets.months[key][repId];
+  t.terms = clampInt(t.terms);
+  t.closes = clampInt(t.closes);
+  return t;
+}
+function getYearTargets(repId, y){
+  ensureTargets();
+  state.targets.years[y] ||= {};
+  state.targets.years[y][repId] ||= { closes: 0 };
+  const t = state.targets.years[y][repId];
+  t.closes = clampInt(t.closes);
+  return t;
+}
+
+function monthActualsForRep(weeksArr, repId){
+  let terms = 0;
+  let closes = 0;
+  weeksArr.forEach(w => {
+    const wk = state.weeks[String(w)] || {};
+    const d = wk[repId];
+    if (!d) return;
+    terms += clampInt(d.wpDone) + clampInt(d.noShow);
+    closes += clampInt(d.actualCloses);
+  });
+  return { terms, closes };
+}
+
+
+function renderYearGoals(weeksArr){
+  if (!monthGoals) return;
+
+  ensureTargets();
+
+  if (!state.reps.length){
+    monthGoals.innerHTML = `<div class="note">Keine Vertriebler vorhanden.</div>`;
+    return;
+  }
+
+  const yKey = yearKey();
+  monthGoals.innerHTML = "";
+
+  // sort by year closes desc (actual)
+  const rows = state.reps.map(r => {
+    const a = monthActualsForRep(weeksArr, r.id); // uses actualCloses for given weeks
+    return { rep: r, aCloses: a.closes };
+  }).sort((a,b)=> b.aCloses - a.aCloses);
+
+  rows.forEach(({ rep, aCloses }) => {
+    const yt = getYearTargets(rep.id, yKey);
+
+    const row = document.createElement("div");
+    row.className = "barRow";
+
+    const top = document.createElement("div");
+    top.className = "barTop";
+
+    const left = document.createElement("div");
+    left.className = "checkLeft";
+    left.style.minWidth = "0";
+    left.innerHTML = `<div class="checkName">${escapeHtml(rep.name)}</div><div class="checkMeta muted">Jahresziel &amp; Fortschritt (WP)</div>`;
+
+    const right = document.createElement("div");
+    right.className = "row";
+    right.style.gap = "10px";
+    right.style.flexWrap = "wrap";
+
+    const box = document.createElement("div");
+    box.style.minWidth = "210px";
+    box.innerHTML = `<div class="muted" style="font-size:11px; font-weight:1000; text-transform:uppercase; letter-spacing:.25px;">Jahresziel Abschlüsse</div>`;
+    box.appendChild(makeGoalInput(yt.closes, (v)=>{ yt.closes=v; saveState(); renderYearGoals(weeksArr); }));
+    right.appendChild(box);
+
+    top.appendChild(left);
+    top.appendChild(right);
+    row.appendChild(top);
+
+    // Bar
+    const target = clampInt(yt.closes);
+    const actual = clampInt(aCloses);
+    const neutral = !(target > 0);
+    const ratio = neutral ? 0 : (actual / target);
+    const width = neutral ? 0 : Math.max(0, Math.min(100, ratio * 100));
+
+    const line = document.createElement("div");
+    line.className = "bar";
+    const fill = document.createElement("i");
+    fill.style.width = `${width}%`;
+    fill.style.background = progressColor(neutral ? 0 : Math.min(1, ratio));
+    line.appendChild(fill);
+
+    const pills = document.createElement("div");
+    pills.className = "row";
+    pills.style.gap = "8px";
+    pills.style.flexWrap = "wrap";
+    const statusPill = document.createElement("span");
+    statusPill.className = neutral ? "pill" : (actual >= target ? "goalBadge" : "pill");
+      statusPill.textContent = neutral ? "kein Ziel" : (actual >= target ? "Ziel erreicht" : "offen");
+    const istPill = document.createElement("span");
+    istPill.className = "pill mono";
+    istPill.textContent = `Ist: ${Math.round(actual)}`;
+    const zielPill = document.createElement("span");
+    zielPill.className = "pill mono";
+    zielPill.textContent = `Ziel: ${Math.round(target)}`;
+    pills.appendChild(statusPill);
+    pills.appendChild(istPill);
+    pills.appendChild(zielPill);
+
+    row.appendChild(line);
+    row.appendChild(pills);
+
+    monthGoals.appendChild(row);
+  });
+}
+
+function yearActualClosesForRep(repId){
+  let closes = 0;
+  for (let w=1; w<=53; w++){
+    const wk = state.weeks[String(w)] || {};
+    const d = wk[repId];
+    if (!d) continue;
+    closes += clampInt(d.actualCloses);
+  }
+  return closes;
+}
+
+function progressColor(ratio){
+  // ratio: 0..1+ ; clamp for color
+  const r = Math.max(0, Math.min(1, ratio || 0));
+  const hue = 0 + (120 * r);            // 0=rot, 60=orange, 120=grün
+  const light = 42 + (18 * r);          // wird heller Richtung Ziel
+  return `hsl(${hue}deg 85% ${light}%)`;
+}
+
+function makeGoalInput(initialValue, onCommit){
+  const inp = document.createElement("input");
+  inp.type = "number";
+  inp.min = "0";
+  inp.step = "1";
+  inp.value = String(clampInt(initialValue));
+  inp.className = "cellInput small";
+  inp.addEventListener("change", () => {
+    const v = clampInt(Number(inp.value));
+    inp.value = String(v);
+    onCommit(v);
+  });
+  return inp;
+}
+
+function renderMonthGoals(weeksArr){
+  if (!monthGoals) return;
+
+  ensureTargets();
+
+  if (!state.reps.length){
+    monthGoals.innerHTML = `<div class="note">Keine Vertriebler vorhanden.</div>`;
+    return;
+  }
+
+  const mKey = monthKey();
+  const yKey = yearKey();
+
+  monthGoals.innerHTML = "";
+
+  // sort by month closes desc (actual)
+  const rows = state.reps.map(r => {
+    const a = monthActualsForRep(weeksArr, r.id);
+    return { rep: r, aTerms: a.terms, aCloses: a.closes };
+  }).sort((a,b)=> b.aCloses - a.aCloses);
+
+  rows.forEach(({ rep, aTerms, aCloses }) => {
+    const mt = getMonthTargets(rep.id, mKey);
+    const yt = getYearTargets(rep.id, yKey);
+    const aYearCloses = yearActualClosesForRep(rep.id);
+
+    const row = document.createElement("div");
+    row.className = "barRow";
+
+    // Header
+    const top = document.createElement("div");
+    top.className = "barTop";
+
+    const left = document.createElement("div");
+    left.className = "checkLeft";
+    left.style.minWidth = "0";
+    left.innerHTML = `<div class="checkName">${escapeHtml(rep.name)}</div><div class="checkMeta muted">Ziele &amp; Fortschritt (WP)</div>`;
+
+    const right = document.createElement("div");
+    right.className = "row";
+    right.style.gap = "10px";
+    right.style.flexWrap = "wrap";
+
+    // Inputs: Monatsziel Termine, Monatsziel Abschlüsse, Jahresziel Abschlüsse
+    const box1 = document.createElement("div");
+    box1.style.minWidth = "210px";
+    box1.innerHTML = `<div class="muted" style="font-size:11px; font-weight:1000; text-transform:uppercase; letter-spacing:.25px;">Monatsziel Termine</div>`;
+    box1.appendChild(makeGoalInput(mt.terms, (v)=>{ mt.terms=v; saveState(); renderMonthGoals(weeksArr); }));
+
+    const box2 = document.createElement("div");
+    box2.style.minWidth = "210px";
+    box2.innerHTML = `<div class="muted" style="font-size:11px; font-weight:1000; text-transform:uppercase; letter-spacing:.25px;">Monatsziel Abschlüsse</div>`;
+    box2.appendChild(makeGoalInput(mt.closes, (v)=>{ mt.closes=v; saveState(); renderMonthGoals(weeksArr); }));
+
+    const box3 = document.createElement("div");
+    box3.style.minWidth = "210px";
+    box3.innerHTML = `<div class="muted" style="font-size:11px; font-weight:1000; text-transform:uppercase; letter-spacing:.25px;">Jahresziel Abschlüsse</div>`;
+    box3.appendChild(makeGoalInput(yt.closes, (v)=>{ yt.closes=v; saveState(); renderMonthGoals(weeksArr); }));
+
+    right.appendChild(box1);
+    right.appendChild(box2);
+    right.appendChild(box3);
+
+    top.appendChild(left);
+    top.appendChild(right);
+    row.appendChild(top);
+
+    // --- Bars ---
+    function addBar(label, actual, target){
+      const neutral = !(target > 0);
+      const ratio = neutral ? 0 : (actual / target);
+      const width = neutral ? 0 : Math.max(0, Math.min(100, ratio * 100));
+      const pillRight = document.createElement("div");
+      pillRight.className = "row";
+      pillRight.style.gap = "8px";
+      pillRight.style.flexWrap = "wrap";
+
+      const statusPill = document.createElement("span");
+      statusPill.className = neutral ? "pill" : (actual >= target ? "goalBadge" : "pill");
+      statusPill.textContent = neutral ? "kein Ziel" : (actual >= target ? "Ziel erreicht" : "offen");
+
+      const istPill = document.createElement("span");
+      istPill.className = "pill mono";
+      istPill.textContent = `Ist: ${Math.round(actual)}`;
+
+      const zielPill = document.createElement("span");
+      zielPill.className = "pill mono";
+      zielPill.textContent = `Ziel: ${Math.round(target)}`;
+
+      const pctPill = document.createElement("span");
+      pctPill.className = "pill mono";
+      pctPill.textContent = neutral ? "—" : pct(actual / target);
+
+      pillRight.appendChild(statusPill);
+      pillRight.appendChild(istPill);
+      pillRight.appendChild(zielPill);
+      pillRight.appendChild(pctPill);
+
+      const barTop = document.createElement("div");
+      barTop.className = "barTop";
+      barTop.style.marginTop = "10px";
+
+      const lbl = document.createElement("div");
+      lbl.className = "checkName";
+      lbl.textContent = label;
+
+      barTop.appendChild(lbl);
+      barTop.appendChild(pillRight);
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("i");
+      fill.style.width = `${width}%`;
+      fill.style.background = progressColor(ratio);
+      bar.appendChild(fill);
+
+      row.appendChild(barTop);
+      row.appendChild(bar);
+    }
+
+    addBar("Termine (WP)", aTerms, mt.terms);
+    addBar("Abschlüsse (WP)", aCloses, mt.closes);
+    addBar("Jahresabschlüsse (WP)", aYearCloses, yt.closes);
+
+    monthGoals.appendChild(row);
+  });
+}
+
+
+  
+  function collectDealsForRep(repId){
+    const rows = [];
+    let totalRevenueNet = 0;
+    let totalRevenueGross = 0;
+    let totalCancelledRevenue = 0;
+    let totalCountGross = 0;
+    let totalCountNet = 0;
+    let totalCountCancelled = 0;
+
+    for (let w=1; w<=53; w++){
+      const wk = state.weeks[String(w)] || {};
+      const d = wk[repId];
+      if (!d) continue;
+      ensureRepWeekData(String(w), repId);
+      normalizeCloseDeals(d);
+
+      const actual = clampInt(d.actualCloses);
+      if (!Array.isArray(d.wpDeals)) d.wpDeals = [];
+      if (d.wpDeals.length > actual) d.wpDeals = d.wpDeals.slice(0, actual);
+
+      for (let i=0; i<actual; i++){
+        let deal = d.wpDeals[i];
+        if (!deal || typeof deal !== "object") deal = { kunde:"", typ:"", umsatz:0, status:"aktiv", cancelledOn:"", cancelReason:"" };
+        // normalize per deal
+        if (typeof deal.kunde !== "string") deal.kunde = String(deal.kunde||"");
+        if (typeof deal.typ !== "string") deal.typ = String(deal.typ||"");
+        deal.umsatz = clampMoney(Number(deal.umsatz)||0);
+        if (!deal.status) deal.status = "aktiv";
+        if (deal.status !== "aktiv" && deal.status !== "storniert") deal.status = "aktiv";
+        if (typeof deal.cancelledOn !== "string") deal.cancelledOn = String(deal.cancelledOn||"");
+        if (typeof deal.cancelReason !== "string") deal.cancelReason = String(deal.cancelReason||"");
+
+        d.wpDeals[i] = deal;
+
+        const isStorno = dealIsCancelled(deal);
+        const um = clampMoney(Number(deal.umsatz)||0);
+
+        const statusHtml = isStorno
+          ? `<span class="badgeNo" title="${escapeHtml(deal.cancelledOn ? ("Storno am " + deal.cancelledOn) : "Storniert")}${escapeHtml(deal.cancelReason ? (" • " + deal.cancelReason) : "")}">storniert</span>`
+          : `<span class="badgeOk">aktiv</span>`;
+
+        rows.push({
+          week: w,
+          idx: i+1,
+          kunde: deal.kunde || "",
+          typ: deal.typ || "",
+          umsatz: um,
+          status: deal.status,
+          statusHtml
+        });
+
+        totalRevenueGross += um;
+        totalCountGross += 1;
+
+        if (isStorno){
+          totalCancelledRevenue += um;
+          totalCountCancelled += 1;
+        } else {
+          totalRevenueNet += um;
+          totalCountNet += 1;
+        }
+      }
+    }
+
+    return { 
+      rows, 
+      totalRevenue: totalRevenueNet,
+      totalRevenueGross,
+      totalCancelledRevenue: totalCancelledRevenue,
+      totalCount: totalCountNet,
+      totalCountGross,
+      totalCountCancelled
+    };
+  }
+
+  function renderDealsPage(){
+    if (!dealsAccordion || !dealsOverview || !dealsPill) return;
+
+    dealsAccordion.innerHTML = "";
+
+    const repFilter = dealsRepSelect ? (dealsRepSelect.value || "") : "";
+    const repsToUse = repFilter ? state.reps.filter(r=>r.id===repFilter) : state.reps.slice();
+
+    let grandRevenue = 0;
+    let grandRevenueGross = 0;
+    let grandCancelledRevenue = 0;
+    let grandCount = 0;
+    let grandCountGross = 0;
+    let grandCountCancelled = 0;
+
+    repsToUse.forEach(rep => {
+      const { rows, totalRevenue, totalRevenueGross, totalCancelledRevenue, totalCount, totalCountGross, totalCountCancelled } = collectDealsForRep(rep.id);
+      grandRevenue += totalRevenue;
+      grandRevenueGross += totalRevenueGross;
+      grandCancelledRevenue += totalCancelledRevenue;
+      grandCount += totalCount;
+      grandCountGross += totalCountGross;
+      grandCountCancelled += totalCountCancelled;
+
+      const details = document.createElement("details");
+      details.style.border = "1px solid rgba(255,255,255,.10)";
+      details.style.borderRadius = "14px";
+      details.style.background = "rgba(255,255,255,.05)";
+      details.style.padding = "10px 10px";
+      details.style.marginBottom = "10px";
+
+      const summary = document.createElement("summary");
+      summary.style.cursor = "pointer";
+      summary.style.fontWeight = "1000";
+      summary.style.listStyle = "none";
+      summary.innerHTML = `${escapeHtml(rep.name)} <span class="pill mono" style="margin-left:10px;">${rows.length} Abschlüsse</span> <span class="pill mono" style="margin-left:8px;">${euros(totalRevenue)}</span> <span class="pill mono" style="margin-left:8px;">Storno: ${totalCountCancelled}/${totalCountGross}</span>`;
+      details.appendChild(summary);
+
+      const inner = document.createElement("div");
+      inner.style.marginTop = "10px";
+
+      if (rows.length === 0){
+        inner.innerHTML = `<div class="note">Keine Abschlussdetails vorhanden (noch keine Ist-Abschlüsse bzw. keine Einträge).</div>`;
+      } else {
+        const tbl = document.createElement("table");
+        tbl.style.width = "100%";
+        tbl.style.borderCollapse = "separate";
+        tbl.style.borderSpacing = "0";
+        tbl.innerHTML = `
+          <thead>
+            <tr>
+              <th>Woche</th>
+              <th>#</th>
+              <th>Kunde</th>
+              <th>Wärmepumpentyp</th>
+              <th>Umsatz</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+        const tb = tbl.querySelector("tbody");
+        rows.forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="mono">W${r.week}</td>
+            <td class="mono">${r.idx}</td>
+            <td>${escapeHtml(r.kunde)}</td>
+            <td>${escapeHtml(r.typ)}</td>
+            <td class="mono">${euros(r.umsatz)}</td>
+          `;
+          tb.appendChild(tr);
+        });
+        inner.appendChild(tbl);
+      }
+
+      details.appendChild(inner);
+      dealsAccordion.appendChild(details);
+    });
+
+    dealsPill.textContent = repFilter ? "Filter aktiv" : "Alle Vertriebler";
+    const rate = grandCountGross > 0 ? (grandCountCancelled / grandCountGross) : 0;
+    dealsOverview.textContent = `Gesamt (netto): ${grandCount} Abschlüsse · ${euros(grandRevenue)} · Storno: ${grandCountCancelled}/${grandCountGross} (${pct(rate)}) · ${euros(grandCancelledRevenue)}`;
+  }
+
+function renderAll(){
+    updateDeadlineBanner();
+    renderReps();
+    renderWeekTable();
+    renderChecklist();
+    updateKPIs(sellerFocus.value || "");
+    renderCharts();
+    renderRanking();
+    renderMonthSummary();
+    renderDealsPage();
+  }
+
+  // Events
+  // Navigation: pages
+    function showPage(which){
+      if (!pagePlan || !pageDeals) return;
+      if (which === "deals"){
+        pagePlan.style.display = "none";
+        pageDeals.style.display = "";
+        if (navPlanBtn) navPlanBtn.className = "btn secondary";
+        if (navDealsBtn) navDealsBtn.className = "btn";
+      } else {
+        pageDeals.style.display = "none";
+        pagePlan.style.display = "";
+        if (navPlanBtn) navPlanBtn.className = "btn";
+        if (navDealsBtn) navDealsBtn.className = "btn secondary";
+      }
+    }
+    if (navPlanBtn) navPlanBtn.addEventListener("click", ()=> showPage("plan"));
+    if (navDealsBtn) navDealsBtn.addEventListener("click", ()=> { showPage("deals"); renderDealsPage(); });
+  
+    if (dealsRepSelect) dealsRepSelect.addEventListener("change", ()=> renderDealsPage());
+    if (dealsExpandAllBtn) dealsExpandAllBtn.addEventListener("click", ()=>{
+      dealsAccordion.querySelectorAll("details").forEach(d=> d.open = true);
+    });
+    if (dealsCollapseAllBtn) dealsCollapseAllBtn.addEventListener("click", ()=>{
+      dealsAccordion.querySelectorAll("details").forEach(d=> d.open = false);
+    });
+  
+    // default page
+    showPage("plan");
+  
+  
+  addRepBtn.addEventListener("click", () => {
+    const name = newRep.value.trim();
+    if (!name) return;
+    state.reps.push({ id: uid(), name });
+    newRep.value = "";
+    saveState();
+    renderAll();
+  });
+  newRep.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addRepBtn.click();
+  });
+
+  weekSelect.addEventListener("change", () => {
+    currentWeek = Number(weekSelect.value);
+    updateDeadlineBanner();
+    renderWeekTable();
+    renderChecklist();
+    updateKPIs(sellerFocus.value || "");
+    renderMonthSummary();
+    renderDealsPage();
+  });
+
+  sellerFocus.addEventListener("change", () => {
+    updateKPIs(sellerFocus.value || "");
+    renderCharts();
+    renderMonthSummary();
+    renderDealsPage();
+  });
+
+  lockOnClosed.addEventListener("change", () => {
+    renderWeekTable();
+  });
+
+  showMiniKpis.addEventListener("change", () => {
+    updateKPIs(sellerFocus.value || "");
+  });
+
+  // Deadline banner + meeting view
+  meetingViewBtn.addEventListener("click", openMeetingView);
+  meetingPrintBtn.addEventListener("click", () => window.print());
+  meetingCloseBtn.addEventListener("click", () => closeModal(meetingModal));
+  meetingModal.addEventListener("click", (e) => { if (e.target === meetingModal) closeModal(meetingModal); });
+
+  // Abschlussdetails modal
+  closeDetailCloseBtn.addEventListener("click", () => closeModal(closeDetailModal));
+  closeDetailModal.addEventListener("click", (e) => { if (e.target === closeDetailModal) closeModal(closeDetailModal); });
+  closeDetailSaveBtn.addEventListener("click", () => {
+    // Kurzanimation (Gewonnen) wenn mindestens ein aktiver Abschluss mit Umsatz vorhanden ist
+    try{
+      const { week, repId } = closeCtx;
+      if (week && repId){
+        const d = (state.weeks[String(week)]||{})[repId];
+        if (d && Array.isArray(d.wpDeals)){
+          const hasWon = d.wpDeals.some(x => x && !dealIsCancelled(x) && clampMoney(Number(x.umsatz)||0) > 0);
+          if (hasWon) celebrateAt(closeDetailSaveBtn);
+        }
+      }
+    }catch(e){}
+
+    const { week, repId } = closeCtx;
+    if (week && repId){
+      ensureRepWeekData(String(week), repId);
+      touch(state.weeks[String(week)][repId]);
+      saveState();
+      renderAll();
+    }
+    closeModal(closeDetailModal);
+  });
+
+  // Delegate "Anlagen…" buttons
+  weekTableBody.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action='close-details']");
+    if (!btn) return;
+    const repId = btn.getAttribute("data-rep");
+    if (!repId) return;
+    const repName = state.reps.find(r=>r.id===repId)?.name || "Vertriebler";
+    openCloseDetailModal(String(currentWeek), repId, repName);
+  });
+
+  setAllInWorkBtn.addEventListener("click", () => {
+    if (!confirm("Wirklich alle Verkäufer dieser Woche auf „in Arbeit“ setzen?")) return;
+    ensureWeek(String(currentWeek));
+    state.reps.forEach(rep => {
+      ensureRepWeekData(String(currentWeek), rep.id);
+      const d = state.weeks[String(currentWeek)][rep.id];
+      d.status = "in_arbeit";
+      touch(d);
+    });
+    onDataChanged();
+  });
+
+  setAllClosedBtn.addEventListener("click", () => {
+    if (!confirm("Wirklich alle Verkäufer dieser Woche auf „abgeschlossen“ setzen?")) return;
+    ensureWeek(String(currentWeek));
+    state.reps.forEach(rep => {
+      ensureRepWeekData(String(currentWeek), rep.id);
+      const d = state.weeks[String(currentWeek)][rep.id];
+      d.status = "abgeschlossen";
+      touch(d);
+    });
+    onDataChanged();
+  });
+
+  yearSelect.addEventListener("change", renderMonthSummary);
+  monthSelect.addEventListener("change", renderMonthSummary);
+  if (periodSelect) periodSelect.addEventListener("change", renderMonthSummary);
+
+  exportBtn.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "vertrieb_wochenplan_export.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  importBtn.addEventListener("click", () => importFile.click());
+
+  icsImportBtn.addEventListener("click", () => icsFile.click());
+  icsFile.addEventListener("change", async () => {
+    const file = icsFile.files?.[0];
+    if (!file) return;
+    try{
+      await importICSFile(file);
+    }catch(e){
+      alert("ICS-Import fehlgeschlagen: " + (e?.message || e));
+    }finally{
+      icsFile.value = "";
+    }
+  });
+
+  importFile.addEventListener("change", async () => {
+    const file = importFile.files?.[0];
+    if (!file) return;
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== "object") throw new Error("Ungültige JSON");
+      parsed.reps ||= [];
+      parsed.weeks ||= {};
+      parsed.targets ||= { months: {}, years: {} };
+      if (!Array.isArray(parsed.reps)) throw new Error("Ungültig: reps");
+      state = parsed;
+
+      // normalize/migrate all week entries
+      Object.keys(state.weeks).forEach(w => {
+        const wk = state.weeks[w] || {};
+        Object.keys(wk).forEach(rid => ensureRepWeekData(w, rid));
+      });
+
+      saveState();
+      renderAll();
+      alert("Import erfolgreich.");
+    }catch(e){
+      alert("Import fehlgeschlagen: " + (e?.message || e));
+    }finally{
+      importFile.value = "";
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (!confirm("Wirklich alles löschen?")) return;
+    state = structuredClone(defaultState);
+    saveState();
+    renderAll();
+  });
+
+  fillPlannedHintBtn.addEventListener("click", () => {
+    alert("Empfehlung (Sonntag): Ziele (WP/Abschlüsse/Umsatz), WP geplant, PV-Zusatz, Plan-Abschlüsse und Umsatz/Abschluss eintragen (Forecast entsteht automatisch).");
+  });
+  fillActualHintBtn.addEventListener("click", () => {
+    alert("Empfehlung (Wochenende): WP durchgeführt/No-Show und Ist-Abschlüsse ergänzen, Status auf „abgeschlossen“ setzen (optional Sperre aktiv).");
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

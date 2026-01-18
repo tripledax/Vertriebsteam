@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Förderrechner Wärmepumpe – Wohngebäude (458) / Unternehmen (522) / Kommunen (422)</title>
+<style>
+:root{
+  --bg:#0b1020;--card:#121a33;--text:#eaf0ff;--muted:#aab6e6;--line:rgba(255,255,255,.12);
+  --good:#53f1c5;--warn:#ffd76a;--bad:#ff6b8a;--accent:#7aa7ff;--accent2:#b18cff;
+  --shadow:0 16px 50px rgba(0,0,0,.35);
+  --r18:18px;--r12:12px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:var(--sans);color:var(--text);
+  background: radial-gradient(1200px 900px at 10% 10%, rgba(122,167,255,.22), transparent 60%),
+              radial-gradient(900px 700px at 90% 15%, rgba(177,140,255,.18), transparent 55%),
+              radial-gradient(1000px 800px at 50% 100%, rgba(83,241,197,.10), transparent 55%),
+              var(--bg);
+}
+header{
+  padding:26px 18px 14px; position:sticky; top:0; z-index:5;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(to bottom, rgba(11,16,32,.92), rgba(11,16,32,.60), rgba(11,16,32,0));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.wrap{max-width:1150px; margin:0 auto;}
+h1{margin:0;font-size:20px;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.35}
+.pillrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.pill{padding:6px 10px;font-size:12px;border-radius:999px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);color:var(--muted);white-space:nowrap}
+main{padding:18px 18px 46px}
+.grid{display:grid;gap:14px;grid-template-columns: 1.15fr .85fr;}
+@media (max-width: 980px){ .grid{grid-template-columns:1fr;} header{position:relative} }
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:var(--r18);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card h2{
+  margin:0; padding:14px 14px 10px; font-size:14px; letter-spacing:.15px;
+  display:flex; align-items:center; justify-content:space-between;
+  background: linear-gradient(90deg, rgba(122,167,255,.14), rgba(177,140,255,.10));
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.content{padding:14px}
+.row{display:grid;grid-template-columns: 1.2fr 1fr;gap:10px;align-items:center;margin:8px 0}
+.row3{display:grid;grid-template-columns: 1fr 1fr 1fr;gap:10px;margin:8px 0}
+.row4{display:grid;grid-template-columns: 1fr 1fr 1fr 1fr;gap:10px;margin:8px 0}
+@media (max-width: 640px){ .row,.row3,.row4{grid-template-columns:1fr} }
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+input,select,textarea{
+  width:100%; padding:10px 10px; background: rgba(15,23,48,.75);
+  color:var(--text); border:1px solid rgba(255,255,255,.13);
+  border-radius:12px; outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:rgba(122,167,255,.55); box-shadow:0 0 0 3px rgba(122,167,255,.12)}
+textarea{min-height:88px; resize:vertical}
+.hint{font-size:12px;color:var(--muted);line-height:1.35}
+.small{font-size:11px;color:var(--muted)}
+.divider{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
+.btnbar{display:flex;gap:10px;flex-wrap:wrap}
+button{
+  border:1px solid rgba(255,255,255,.14);
+  background: linear-gradient(180deg, rgba(122,167,255,.28), rgba(122,167,255,.12));
+  color:var(--text); padding:10px 12px; border-radius:14px; cursor:pointer; font-weight:600;
+}
+button.secondary{background:rgba(255,255,255,.06)}
+button.danger{background: linear-gradient(180deg, rgba(255,107,138,.26), rgba(255,107,138,.12));}
+button:active{transform:translateY(1px)}
+.metric{
+  display:grid; grid-template-columns:1fr auto; gap:8px;
+  padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10);
+  background: rgba(15,23,48,.55); margin:8px 0;
+}
+.metric b{font-size:14px}
+.metric .k{color:var(--muted);font-size:12px}
+.metric .v{font-family:var(--mono);font-size:13px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);padding:5px 9px;border-radius:999px}
+.progress{height:10px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+.progress>div{height:100%;background: linear-gradient(90deg, rgba(83,241,197,.95), rgba(122,167,255,.90), rgba(177,140,255,.90));width:0%}
+details{border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(15,23,48,.45);padding:10px 12px;margin:10px 0}
+summary{cursor:pointer;color:var(--text);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+th,td{padding:8px 8px;border-bottom:1px solid rgba(255,255,255,.10);vertical-align:top}
+th{color:var(--muted);text-align:left;font-weight:600}
+.right{text-align:right}
+.muted{color:var(--muted)} .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.unit{border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(15,23,48,.45);padding:12px;margin:10px 0}
+.unithead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.unithead b{font-size:13px}
+.unitgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.unitgrid{grid-template-columns:1fr}}
+.footerNote{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.45}
+
+/* Print / Report */
+@media print{
+  header{position:relative;background:#fff;color:#000;border:none;backdrop-filter:none}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;background:#fff;border:1px solid #ddd}
+  input,select,textarea{border:1px solid #bbb;background:#fff;color:#000}
+  button,.pillrow,.noPrint{display:none !important}
+  .muted{color:#333}
+}
+
+/* === UI Polishing (Symmetrie & Raster) === */
+label{min-height:18px}
+input, select{height:44px}
+button{height:44px}
+input[type="number"]{text-align:right}
+.row,.row3,.row4{align-items:end}
+.row>div,.row3>div,.row4>div{display:flex;flex-direction:column}
+.hint{margin-top:6px; display:none}
+.small{margin-top:6px}
+body.showHints .hint{display:block}
+body.showHints .small{display:block}
+body:not(.showHints) .small{display:none}
+
+/* Top toolbar toggle */
+.toggle{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+}
+.switch{
+  width:44px; height:24px; border-radius:999px;
+  background: rgba(255,255,255,.18); position:relative;
+  border:1px solid rgba(255,255,255,.18);
+}
+.switch::after{
+  content:""; width:18px; height:18px; border-radius:999px;
+  background: rgba(255,255,255,.85);
+  position:absolute; top:2px; left:2px; transition: all .18s ease;
+}
+body.showHints .switch{background: rgba(83,241,197,.35); border-color: rgba(83,241,197,.55)}
+body.showHints .switch::after{left:22px; background: rgba(234,240,255,.95)}
+.toggle span{font-size:12px; color:var(--muted); user-select:none}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="title" style="display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+      <div>
+        <h1>Förderrechner Wärmepumpe – Wohngebäude (458) / Unternehmen (522) / Kommunen (422)</h1>
+        <div class="sub">
+          Offline‑HTML (ohne Server) · Varianten-Auswahl per Dropdown · Mehrere Wohneinheiten/Eigentümer (458) · Nichtwohngebäude nach NGF (522/422) · Bericht als PDF via „Drucken“.
+        </div>
+        <div class="pillrow noPrint" id="pillrow"></div>
+      </div>
+      <div class="btnbar noPrint">
+        <div class="toggle" id="toggleHints" role="button" tabindex="0" aria-label="Hilfe ein-/ausblenden">
+          <div class="switch" aria-hidden="true"></div>
+          <span>Hilfe/Details</span>
+        </div>
+        <button id="btnPdf">PDF‑Bericht erzeugen</button>
+        <button class="secondary" id="btnExport">Seite drucken / als PDF speichern</button>
+        <button class="secondary" id="btnSave">Projekt speichern</button>
+        <button class="secondary" id="btnLoad">Projekt laden</button>
+        <button class="danger" id="btnReset">Zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap grid">
+    <section class="card">
+      <h2>Eingaben <span class="tag" id="versionTag">Regelstand: 10.12.2025</span></h2>
+      <div class="content">
+
+        <div class="row3">
+          <div>
+            <label>Variante / Programm / Antragstellergruppe</label>
+            <select id="variant">
+              <option value="458_self">KfW 458 – Wohngebäude – Selbstnutzer (EFH/MFH/WEG)</option>
+              <option value="458_landlord">KfW 458 – Wohngebäude – Vermieter / nicht selbstnutzend (EFH/MFH/WEG)</option>
+              <option value="522_company">KfW 522 – Unternehmen/Investoren – Nichtwohngebäude</option>
+              <option value="422_muni">KfW 422 – Kommunen – Wohn- & Nichtwohngebäude</option>
+            </select>
+            <div class="hint">Die Variante steuert Fördersätze/Deckelung & welche Eingabefelder relevant sind.</div>
+          </div>
+
+          <div id="blockBuildingType">
+            <label>Gebäudetyp (Wohngebäude‑Logik)</label>
+            <select id="buildingType">
+              <option value="EFH">Einfamilienhaus (1 WE)</option>
+              <option value="MFH">Mehrfamilienhaus (2–6 WE)</option>
+              <option value="WEG">WEG / Eigentumswohnungen (Gemeinschaftseigentum)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Gesamtkosten (Brutto) für Maßnahme</label>
+            <input id="totalCost" type="number" min="0" step="1" value="35000"/>
+            <div class="hint">Kauf+Einbau inkl. Nebenarbeiten, soweit förderfähig (Deckelung wird automatisch angewandt).</div>
+          </div>
+        </div>
+
+        <div class="row3" id="blockResidentialUnits">
+          <div>
+            <label>Anzahl Wohneinheiten (WE) – nur 458</label>
+            <select id="unitsCount">
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+            </select>
+            <div class="hint">Kostenobergrenze 458: 30.000 € (1. WE) + 15.000 € je WE (2.–6.).</div>
+          </div>
+          <div>
+            <label>Antragsdatum (für Klimabonus‑Stufe)</label>
+            <input id="appDate" type="date"/>
+            <div class="hint">Standard‑Staffel im Rechner: 20 % bis 31.12.2028, danach degressiv (anpassbar).</div>
+          </div>
+          <div>
+            <label>Altanlage (ausgetauscht)</label>
+            <select id="oldSystem">
+              <option value="gas">Gasheizung</option>
+              <option value="oil">Ölheizung</option>
+              <option value="coal">Kohle</option>
+              <option value="night">Nachtspeicher / Stromdirekt</option>
+              <option value="biomass">Biomasse</option>
+              <option value="heatpump">Wärmepumpe (Alt‑WP)</option>
+              <option value="district">Wärmenetz / Gebäudenetz‑Anschluss</option>
+              <option value="none">keine / Neubau / unklar</option>
+            </select>
+          
+        <div class="row3" id="blockAllocMode" style="grid-template-columns: 1fr 1fr;">
+          <div>
+            <label>Kostenverteilung für Bonus‑Schätzung (458)</label>
+            <select id="allocMode">
+              <option value="equal" selected>Gleichmäßig nach Wohneinheiten (wie viele Online‑Rechner)</option>
+              <option value="manual">Nach Anteil (MEA/Kostenanteil manuell je WE)</option>
+            </select>
+            <div class="hint">„Gleichmäßig“ setzt je WE automatisch 100 %/WE. „Nach Anteil“ ist KfW‑näher bei WEG/mehreren Eigentümern (z. B. nach Miteigentumsanteilen).</div>
+          </div>
+          <div>
+            <label>Standard‑Anteile setzen</label>
+            <button type="button" class="secondary" id="btnEqualize">Anteile automatisch setzen</button>
+            <div class="hint">Hilft, wenn du nachträglich die WE‑Zahl änderst oder manuelle Anteile zurücksetzen willst.</div>
+          </div>
+          </div>
+</div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label>Wärmepumpentyp / Wärmequelle</label>
+            <select id="hpType">
+              <option value="AIR">Luft/Wasser</option>
+              <option value="GROUND">Sole/Wasser (Erdreich)</option>
+              <option value="WATER">Wasser/Wasser</option>
+              <option value="WASTE">Abwasser</option>
+              <option value="OTHER">Sonstige / unklar</option>
+            </select>
+          </div>
+          <div>
+            <label>Natürliches Kältemittel (z. B. R290)?</label>
+            <select id="naturalRefrigerant">
+              <option value="yes">Ja</option>
+              <option value="no" selected>Nein</option>
+              <option value="unknown">Unklar</option>
+            </select>
+          </div>
+          <div id="blockOldAge">
+            <label>Alter Altanlage (Jahre, gerundet)</label>
+            <input id="oldAge" type="number" min="0" step="1" value="22"/>
+          </div>
+        </div>
+
+        <div class="row3" id="blockNonResArea" style="display:none">
+          <div>
+            <label>Nettogrundfläche (NGF) gesamt (m²) – 522/422</label>
+            <input id="ngfTotal" type="number" min="0" step="1" value="300"/>
+            <div class="hint">Förderhöchstbetrag (max. förderfähige Kosten) hängt von der NGF ab.</div>
+          </div>
+          <div>
+            <label>Maßnahme betrifft ganze Fläche?</label>
+            <select id="ngfScope">
+              <option value="all" selected>Ja – gesamte NGF</option>
+              <option value="part">Nein – nur Teilfläche</option>
+            </select>
+            <div class="hint">Wenn nicht die gesamte Fläche betroffen ist, wird die Höchstgrenze anteilig angesetzt.</div>
+          </div>
+          <div id="blockNgfAffected" style="display:none">
+            <label>Betroffene NGF (m²)</label>
+            <input id="ngfAffected" type="number" min="0" step="1" value="300"/>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label>Mehrere Wärmeerzeuger / Kaskade / Hybrid?</label>
+            <select id="multiGen">
+              <option value="no" selected>Nein</option>
+              <option value="yes">Ja</option>
+            </select>
+          </div>
+          <div>
+            <label>Projektname / Objekt</label>
+            <input id="projectName" type="text" value="Projekt Wärmepumpe"/>
+          </div>
+          <div>
+            <label>Kunde / Antragsteller (Kurzlabel)</label>
+            <input id="clientName" type="text" value="Kunde"/>
+          </div>
+        </div>
+
+        <details id="detailsOwners">
+          <summary>Wohneinheiten & Eigentümer / Antragsteller (bis 6) – 458</summary>
+          <div class="hint" style="margin-top:10px">
+            Für MFH/WEG: Basisförderung (Grund + Effizienz) bezieht sich auf die Maßnahme. Bonuskomponenten (Klimabonus/Einkommensbonus) werden typischerweise als Zusatzanträge je selbstnutzender Wohneinheit abgebildet.
+          </div>
+          <div id="unitsContainer"></div>
+          <div class="hint"><b>Kostenaufteilung:</b> Summe = 100 %. Standard: gleichmäßig. Diese Aufteilung steuert die Bonus‑Schätzung je WE.</div>
+        </details>
+
+        <details id="detailsParties" style="display:none">
+          <summary>Antragsteller / Kostenaufteilung (522/422) – optional</summary>
+          <div class="hint" style="margin-top:10px">
+            522/422 kennt keine „Wohneinheiten‑Bonuslogik“. Diese Liste dient nur der Berichtsausgabe (wer trägt welchen Anteil).
+          </div>
+          <div id="partiesContainer"></div>
+        </details>
+
+        <details>
+          <summary>Regeln & Parameter anpassen (für Updates)</summary>
+          <div class="hint" style="margin-top:10px">
+            Förderregeln ändern sich. Hier kannst du die Parameter pro Programm schnell korrigieren.
+          </div>
+
+          <div class="row3">
+            <div>
+              <label>Programm‑Preset</label>
+              <select id="preset">
+                <option value="auto" selected>Automatisch aus Variante</option>
+                <option value="458">458‑Preset</option>
+                <option value="522">522‑Preset</option>
+                <option value="422">422‑Preset</option>
+                <option value="custom">Benutzerdefiniert</option>
+              </select>
+            </div>
+            <div>
+              <label>Max. Fördersatz (%)</label>
+              <input id="pMax" type="number" min="0" step="0.1" value="70"/>
+            </div>
+            <div>
+              <label>Hinweistext (Bericht)</label>
+              <textarea id="criteriaNotes"></textarea>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div id="params458">
+            <div class="row4">
+              <div><label>Grundförderung 458 (%)</label><input id="pBase458" type="number" min="0" step="0.1" value="30"/></div>
+              <div><label>Effizienzbonus 458 (%)</label><input id="pEff458" type="number" min="0" step="0.1" value="5"/></div>
+              <div><label>Einkommensbonus 458 (%)</label><input id="pInc458" type="number" min="0" step="0.1" value="30"/></div>
+              <div><label>zvE‑Schwelle 458 (€)</label><input id="incThreshold458" type="number" min="0" step="1" value="40000"/></div>
+            </div>
+            <div class="row">
+              <div>
+                <label>Klimabonus‑Staffel 458 (JSON)</label>
+                <textarea id="speedSchedule458"></textarea>
+                <div class="small">Format: [{"from":"2024-01-01","to":"2028-12-31","p":20}, ...]</div>
+              </div>
+              <div>
+                <label>Kostenobergrenze 458 (WE‑Logik)</label>
+                <div class="row3" style="margin:0">
+                  <div><label>1. WE (€)</label><input id="cap1_458" type="number" min="0" step="1" value="30000"/></div>
+                  <div><label>2.–6. WE (€ je WE)</label><input id="cap2to6_458" type="number" min="0" step="1" value="15000"/></div>
+                  <div><label>WE max.</label><input id="capUnitsMax_458" type="number" min="1" step="1" value="6"/></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="params522" style="display:none">
+            <div class="row4">
+              <div><label>Grundförderung 522 (%)</label><input id="pBase522" type="number" min="0" step="0.1" value="30"/></div>
+              <div><label>Effizienzbonus 522 (%)</label><input id="pEff522" type="number" min="0" step="0.1" value="5"/></div>
+              <div><label>Max. Fördersatz 522 (%)</label><input id="pMax522" type="number" min="0" step="0.1" value="35"/></div>
+              <div><label>Hinweis: Emissionsminderungszuschlag (Biomasse) (€)</label><input id="bioBonus522" type="number" min="0" step="1" value="2500"/></div>
+            </div>
+            <div class="row">
+              <div>
+                <label>NGF‑Kostenobergrenze 522 (Formelparameter)</label>
+                <textarea id="ngfCapParams522"></textarea>
+                <div class="small">Standard gemäß Merkblatt: 30.000 € bis 150 m², +200 €/m² (150–400), +120 €/m² (400–1000), +80 €/m² (&gt;1000).</div>
+              </div>
+              <div class="hint">
+                522: Grundförderung 30 % + Effizienzbonus 5 % (bei Wasser/Erdreich/Abwasser oder natürlichem Kältemittel), maximal 35 %.
+              </div>
+            </div>
+          </div>
+
+          <div id="params422" style="display:none">
+            <div class="row4">
+              <div><label>Grundförderung 422 (%)</label><input id="pBase422" type="number" min="0" step="0.1" value="30"/></div>
+              <div><label>Effizienzbonus 422 (%)</label><input id="pEff422" type="number" min="0" step="0.1" value="5"/></div>
+              <div><label>Max. Fördersatz 422 (%)</label><input id="pMax422" type="number" min="0" step="0.1" value="35"/></div>
+              <div><label>Hinweis: Emissionsminderungszuschlag (Biomasse) (€)</label><input id="bioBonus422" type="number" min="0" step="1" value="2500"/></div>
+            </div>
+            <div class="row">
+              <div>
+                <label>NGF‑Kostenobergrenze 422 (Formelparameter)</label>
+                <textarea id="ngfCapParams422"></textarea>
+                <div class="small">Standard identisch zur NGF‑Staffel (siehe KfW‑Seite/ Merkblatt).</div>
+              </div>
+              <div class="hint">
+                422: Grundförderung 30 % + Effizienzbonus 5 %, maximal 35 %. Keine 458‑Boni (Klima/Einkommen) in diesem Rechner.
+              </div>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <aside class="card">
+      <h2>Ergebnis</h2>
+      <div class="content">
+        <div class="metric">
+          <div><div class="k">Förderfähige Kosten (gedeckelt)</div><b id="eligibleCostText">–</b></div>
+          <div class="v" id="eligibleCostMono">–</div>
+        </div>
+
+        <div class="metric">
+          <div><div class="k">Geschätzter Zuschuss gesamt</div><b id="grantTotalText">–</b></div>
+          <div class="v" id="grantTotalMono">–</div>
+        </div>
+
+        <div class="metric">
+          <div><div class="k">Effektiver Zuschuss‑Satz auf förderfähige Kosten</div><b id="rateText">–</b></div>
+          <div class="v" id="rateMono">–</div>
+        </div>
+
+        <div class="progress" aria-label="Förderquote"><div id="rateBar"></div></div>
+
+        <div class="divider"></div>
+
+        <div class="metric">
+          <div><div class="k">Eigenanteil (auf förderfähige Kosten)</div><b id="ownShareText">–</b></div>
+          <div class="v" id="ownShareMono">–</div>
+        </div>
+
+        <details open>
+          <summary>Aufschlüsselung</summary>
+          <table>
+            <thead><tr><th>Komponente</th><th class="right">Satz</th><th class="right">Zuschuss</th></tr></thead>
+            <tbody id="breakdownBody"></tbody>
+          </table>
+        </details>
+
+        <details id="detailsUnitsOut" style="display:none">
+          <summary>Wohneinheiten / Eigentümer (geschätzt, inkl. Zusatzanträge)</summary>
+          <table>
+            <thead><tr><th>WE</th><th>Eigentümer</th><th class="right">Kostenanteil</th><th class="right">Satz</th><th class="right">Zuschuss</th></tr></thead>
+            <tbody id="unitBody"></tbody>
+          </table>
+          <div class="footerNote">458: Für MFH/WEG kann Basisförderung gemeinschaftlich beantragt werden; Bonuskomponenten ggf. über Zusatzanträge je selbstnutzender Wohneinheit (nur 1× pro WE). Rechner bildet das über Kostenaufteilung ab.</div>
+        </details>
+
+        <details id="detailsPartiesOut" style="display:none">
+          <summary>Antragsteller / Kostenaufteilung (Bericht)</summary>
+          <table>
+            <thead><tr><th>Partei</th><th class="right">Kostenanteil</th><th class="right">Zuschuss (anteilig)</th></tr></thead>
+            <tbody id="partiesBody"></tbody>
+          </table>
+        </details>
+
+        <details>
+          <summary>Hinweise & Plausibilitätschecks</summary>
+          <ul class="hint" id="checks" style="margin:10px 0 0 18px"></ul>
+        </details>
+
+        <div class="footerNote">
+          Quellenbasis (Kurz): KfW Produkt/ Merkblatt 458 (Wohngebäude), Merkblatt 522 (Nichtwohngebäude), KfW‑Infos zu 422. Rechtsstand: 10.12.2025.
+          <br/>Dieser Rechner ist indikativ und ersetzt keine Richtlinie/FAQ und keine Rechtsberatung.
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+const NF = new Intl.NumberFormat("de-DE", {maximumFractionDigits:0});
+function eur(n){ if(!isFinite(n)) return "–"; return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n); }
+function pct(n){ if(!isFinite(n)) return "–"; return new Intl.NumberFormat("de-DE",{style:"percent",maximumFractionDigits:1}).format(n/100); }
+function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+function parseNum(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function todayISO(){ const d=new Date(); const p=(x)=>String(x).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+function escapeHtml(s){ return (s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+// ===== Presets / Schedules =====
+const speedScheduleDefault = [
+  {from:"2024-01-01", to:"2028-12-31", p:20},
+  {from:"2029-01-01", to:"2030-12-31", p:17},
+  {from:"2031-01-01", to:"2032-12-31", p:14},
+  {from:"2033-01-01", to:"2034-12-31", p:11},
+  {from:"2035-01-01", to:"2099-12-31", p:8}
+];
+
+const criteriaDefault =
+`Hinweise (vereinfacht, bitte Richtlinie/FAQ prüfen):
+• Effizienzbonus: Erdreich/Wasser/Abwasser ODER natürliches Kältemittel.
+• 458 Klimabonus: typischerweise selbstnutzend + Austausch einer funktionsfähigen fossilen Heizung; Details/Alterskriterium können je nach Konstellation abweichen.
+• 458 Einkommensbonus: selbstnutzend + zu versteuerndes Haushaltsjahreseinkommen ≤ Schwelle (typisch 40.000 €).
+• 522/422: Grundförderung + ggf. Effizienzbonus, max. 35 %. Förderhöchstbetrag abhängig von Nettogrundfläche (NGF); bei Teilfläche anteilig.`;
+
+const ngfCapDefault = { base150:30000, add150_400:200, add400_1000:120, add1000p:80 };
+
+// ===== Residential units model (458) =====
+let units = []; // [{id, ownerName, selfUse, incomeZVE, wantsIncomeBonus, wantsSpeedBonus, costSharePct}]
+function ensureUnits(n){
+  while(units.length < n){
+    const i = units.length + 1;
+    units.push({ id:i, ownerName:`Eigentümer ${i}`, selfUse:(i===1), incomeZVE:35000, wantsIncomeBonus:(i===1), wantsSpeedBonus:(i===1), costSharePct:Math.round(100/n) });
+  }
+  while(units.length > n) units.pop();
+  normalizeShares(units);
+}
+function normalizeShares(arr){
+  const n = arr.length; if(n===0) return;
+  // Allocation mode (458): equal per unit or manual/MEA
+  const allocMode = (document.getElementById("allocMode")?.value || "manual");
+  if(allocMode === "equal"){
+    const eq = 100/n;
+    arr.forEach(u=>u.costSharePct = Math.round(eq));
+    // fix rounding drift
+    const rounded = arr.map(u=>u.costSharePct);
+    let drift = 100 - rounded.reduce((a,x)=>a+x,0);
+    let idx=0;
+    while(drift!==0 && n>0){
+      rounded[idx] += (drift>0?1:-1);
+      drift += (drift>0?-1:1);
+      idx=(idx+1)%n;
+    }
+    arr.forEach((u,i)=>u.costSharePct = rounded[i]);
+    return;
+  }
+  let sum = arr.reduce((a,u)=>a + parseNum(u.costSharePct), 0);
+  if(sum <= 0){
+    const eq=100/n; arr.forEach(u=>u.costSharePct=eq); sum=100;
+  }
+  arr.forEach(u=>u.costSharePct = (parseNum(u.costSharePct)/sum)*100);
+  const rounded = arr.map(u=>Math.round(u.costSharePct));
+  let drift = 100 - rounded.reduce((a,x)=>a+x,0);
+  let idx=0;
+  while(drift!==0 && n>0){
+    rounded[idx] += (drift>0?1:-1);
+    drift += (drift>0?-1:1);
+    idx=(idx+1)%n;
+  }
+  arr.forEach((u,i)=>u.costSharePct = rounded[i]);
+}
+function renderUnits(){
+  const c=$("unitsContainer"); c.innerHTML="";
+  for(const u of units){
+    const wrap=document.createElement("div");
+    wrap.className="unit";
+    wrap.innerHTML = `
+      <div class="unithead"><b>Wohneinheit ${u.id}</b><span class="tag">Zusatzantrag (Bonus) je WE max. 1×</span></div>
+      <div class="unitgrid">
+        <div><label>Eigentümer / Antragsteller (Name/Label)</label><input data-k="ownerName" data-id="${u.id}" value="${escapeHtml(u.ownerName)}"/></div>
+        <div><label>Kostenanteil (%)</label><input data-k="costSharePct" data-id="${u.id}" type="number" min="0" step="1" value="${u.costSharePct}" ${$("allocMode")?.value==="equal" ? "disabled" : ""}/></div>
+        <div>
+          <label>Selbstnutzung dieser WE?</label>
+          <select data-k="selfUse" data-id="${u.id}">
+            <option value="yes" ${u.selfUse?"selected":""}>Ja</option>
+            <option value="no" ${!u.selfUse?"selected":""}>Nein</option>
+          </select>
+          <div class="small">Einkommensbonus & Klimabonus sind typischerweise an Selbstnutzung gekoppelt.</div>
+        </div>
+        <div><label>zvE Haushaltsjahreseinkommen (€) – Einkommensbonus</label><input data-k="incomeZVE" data-id="${u.id}" type="number" min="0" step="1" value="${u.incomeZVE}"/></div>
+        <div><label>Einkommensbonus beantragen?</label>
+          <select data-k="wantsIncomeBonus" data-id="${u.id}">
+            <option value="yes" ${u.wantsIncomeBonus?"selected":""}>Ja</option>
+            <option value="no" ${!u.wantsIncomeBonus?"selected":""}>Nein</option>
+          </select>
+        </div>
+        <div><label>Klimabonus beantragen?</label>
+          <select data-k="wantsSpeedBonus" data-id="${u.id}">
+            <option value="yes" ${u.wantsSpeedBonus?"selected":""}>Ja</option>
+            <option value="no" ${!u.wantsSpeedBonus?"selected":""}>Nein</option>
+          </select>
+        </div>
+      </div>
+    `;
+    c.appendChild(wrap);
+  }
+  c.querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("input", ()=>{
+      const id=parseNum(el.getAttribute("data-id"));
+      const k=el.getAttribute("data-k");
+      const u=units.find(x=>x.id===id); if(!u) return;
+      if(k==="selfUse") u.selfUse = (el.value==="yes");
+      else if(k==="wantsIncomeBonus") u.wantsIncomeBonus = (el.value==="yes");
+      else if(k==="wantsSpeedBonus") u.wantsSpeedBonus = (el.value==="yes");
+      else if(k==="incomeZVE") u.incomeZVE = parseNum(el.value);
+      else if(k==="costSharePct") u.costSharePct = parseNum(el.value);
+      else if(k==="ownerName") u.ownerName = el.value;
+      normalizeShares(units);
+      renderUnits();
+      recalc();
+    });
+  });
+}
+
+// ===== Parties model (522/422 optional report split) =====
+let parties = []; // [{id, name, sharePct}]
+function ensureParties(n){
+  while(parties.length < n){
+    const i=parties.length+1;
+    parties.push({id:i, name:`Partei ${i}`, sharePct:Math.round(100/n)});
+  }
+  while(parties.length > n) parties.pop();
+  normalizeShares(parties);
+}
+function renderParties(){
+  const c=$("partiesContainer"); c.innerHTML="";
+  for(const p of parties){
+    const wrap=document.createElement("div");
+    wrap.className="unit";
+    wrap.innerHTML = `
+      <div class="unithead"><b>${escapeHtml(p.name)}</b><span class="tag">nur Bericht</span></div>
+      <div class="unitgrid">
+        <div><label>Name / Unternehmen / Träger</label><input data-k="name" data-id="${p.id}" value="${escapeHtml(p.name)}"/></div>
+        <div><label>Kostenanteil (%)</label><input data-k="sharePct" data-id="${p.id}" type="number" min="0" step="1" value="${p.sharePct}"/></div>
+      </div>
+    `;
+    c.appendChild(wrap);
+  }
+  c.querySelectorAll("input").forEach(el=>{
+    el.addEventListener("input", ()=>{
+      const id=parseNum(el.getAttribute("data-id"));
+      const k=el.getAttribute("data-k");
+      const p=parties.find(x=>x.id===id); if(!p) return;
+      if(k==="name") p.name=el.value;
+      if(k==="sharePct") p.sharePct=parseNum(el.value);
+      normalizeShares(parties);
+      renderParties();
+      recalc();
+    });
+  });
+}
+
+// ===== Rules helpers =====
+function isFossil(oldSystem){ return ["gas","oil","coal","night"].includes(oldSystem); }
+
+function speedBonusPercent(appDateISO){
+  let sched;
+  try{ sched = JSON.parse($("speedSchedule458").value); if(!Array.isArray(sched)) throw 0; }
+  catch(e){ sched = speedScheduleDefault; }
+  const d=new Date(appDateISO); if(isNaN(d)) return 0;
+  for(const it of sched){
+    const a=new Date(it.from), b=new Date(it.to);
+    if(!isNaN(a)&&!isNaN(b)&&d>=a&&d<=b) return parseNum(it.p);
+  }
+  return 0;
+}
+
+function cap458(unitsCount){
+  const cap1=parseNum($("cap1_458").value);
+  const cap2=parseNum($("cap2to6_458").value);
+  const maxU=parseNum($("capUnitsMax_458").value);
+  const n=clamp(unitsCount,1,maxU);
+  if(n===1) return cap1;
+  return cap1 + (n-1)*cap2;
+}
+
+function capNgf(formText, ngfTotal){
+  let p=ngfCapDefault;
+  try{
+    const obj=JSON.parse(formText);
+    if(obj && typeof obj==="object") p={...p, ...obj};
+  }catch(e){}
+  const a=parseNum(p.base150), b=parseNum(p.add150_400), c=parseNum(p.add400_1000), d=parseNum(p.add1000p);
+  const ngf=Math.max(0, parseNum(ngfTotal));
+  const part1 = Math.min(ngf,150);
+  const part2 = Math.max(0, Math.min(ngf,400)-150);
+  const part3 = Math.max(0, Math.min(ngf,1000)-400);
+  const part4 = Math.max(0, ngf-1000);
+  return a + b*part2 + c*part3 + d*part4;
+}
+
+function setPills(){
+  const v=$("variant").value;
+  const pills=$("pillrow"); pills.innerHTML="";
+  const add=(t)=>{ const s=document.createElement("span"); s.className="pill"; s.textContent=t; pills.appendChild(s); };
+  if(v.startsWith("458")){
+    add("458: Grundförderung 30 %");
+    add("458: Effizienzbonus +5 % (Quelle/ natürliches Kältemittel)");
+    add("458: Klimabonus nach Datum (Default bis 31.12.2028: 20 %)");
+    add("458: Einkommensbonus +30 % (selbstnutzend, ≤ 40.000 € zvE)");
+    add("458: Max. Fördersatz 70 %");
+  } else if(v==="522_company"){
+    add("522: Grundförderung 30 %");
+    add("522: Effizienzbonus +5 % (Quelle/ natürliches Kältemittel)");
+    add("522: Max. Fördersatz 35 %");
+    add("522: Kostenobergrenze nach NGF (Staffel)");
+  } else {
+    add("422: Grundförderung 30 %");
+    add("422: Effizienzbonus +5 % (Quelle/ natürliches Kältemittel)");
+    add("422: Max. Fördersatz 35 %");
+    add("422: Kostenobergrenze nach NGF (Staffel)");
+  }
+}
+
+function applyPreset(){
+  const preset=$("preset").value;
+  const v=$("variant").value;
+  const use = (preset==="auto") ? (v.startsWith("458")?"458":(v==="522_company"?"522":"422")) : preset;
+
+  // show/hide parameter blocks
+  $("params458").style.display = (use==="458") ? "" : "none";
+  $("params522").style.display = (use==="522") ? "" : "none";
+  $("params422").style.display = (use==="422") ? "" : "none";
+
+  // set global pMax shown (for info/override) based on program unless custom
+  if(preset==="auto"){
+    if(use==="458") $("pMax").value = "70";
+    if(use==="522") $("pMax").value = $("pMax522").value;
+    if(use==="422") $("pMax").value = $("pMax422").value;
+  }
+}
+
+function switchUI(){
+  const v=$("variant").value;
+  const is458 = v.startsWith("458");
+  $("blockBuildingType").style.display = is458 ? "" : "none";
+  $("blockResidentialUnits").style.display = is458 ? "" : "none";
+  $("blockOldAge").style.display = is458 ? "" : "none";
+  $("detailsOwners").style.display = is458 ? "" : "none";
+  $("blockAllocMode").style.display = is458 ? "" : "none";
+  $("detailsUnitsOut").style.display = is458 ? "" : "none";
+
+  $("blockNonResArea").style.display = is458 ? "none" : "";
+  $("detailsParties").style.display = is458 ? "none" : "";
+  $("detailsPartiesOut").style.display = is458 ? "none" : "";
+
+  if(!is458){
+    // initialize optional parties list (3 by default)
+    if(parties.length===0) ensureParties(3);
+    renderParties();
+  }
+
+  setPills();
+  applyPreset();
+  recalc();
+}
+
+function calc(){
+  const v=$("variant").value;
+  const totalCost=parseNum($("totalCost").value);
+  const hpType=$("hpType").value;
+  const natRef=$("naturalRefrigerant").value;
+
+  const effEligible = (hpType==="GROUND" || hpType==="WATER" || hpType==="WASTE" || natRef==="yes");
+
+  const checks=[];
+  if(totalCost<=0) checks.push({t:"Gesamtkosten sind 0 € – bitte prüfen.",lvl:"warn"});
+  if($("multiGen").value==="yes") checks.push({t:"Mehrere Wärmeerzeuger: förderfähige Kosten sauber abgrenzen; Rechner modelliert eine Kostenbasis.",lvl:"warn"});
+
+  if(v.startsWith("458")){
+    const bt=$("buildingType").value;
+    if(bt==="EFH") $("unitsCount").value="1";
+    const nUnits=parseNum($("unitsCount").value);
+    ensureUnits(nUnits);
+
+    const pBase=parseNum($("pBase458").value);
+    const pEff=parseNum($("pEff458").value);
+    const pInc=parseNum($("pInc458").value);
+    const pMax=parseNum($("pMax").value); // 70 default
+    const incThr=parseNum($("incThreshold458").value);
+
+    const oldSystem=$("oldSystem").value;
+    const oldAge=parseNum($("oldAge").value);
+    const appDate=$("appDate").value || todayISO();
+    const speedP=speedBonusPercent(appDate);
+
+    const cap=cap458(nUnits);
+    const eligible=Math.min(totalCost, cap);
+    if(totalCost>cap) checks.push({t:`Kosten liegen über der Obergrenze (${eur(cap)}). Förderfähige Kosten werden gedeckelt.`,lvl:"warn"});
+    if(!effEligible) checks.push({t:"Effizienzbonus wird nicht angesetzt (Quelle/ natürliches Kältemittel nicht erfüllt).",lvl:"muted"});
+    if(!isFossil(oldSystem)) checks.push({t:"Klimabonus evtl. nicht anwendbar (Altanlage nicht eindeutig fossil).",lvl:"muted"});
+    if(isFossil(oldSystem) && oldAge < 20) checks.push({t:"Altanlage < 20 Jahre: Klimabonus kann entfallen – bitte Richtlinie/FAQ prüfen.",lvl:"warn"});
+
+    const baseRate = pBase + (effEligible?pEff:0);
+    const baseGrant = eligible * baseRate/100;
+
+    let bonusGrant=0, incomeGrant=0, speedGrant=0;
+    const unitRows=[];
+    const eligibleByUnit = (u)=> eligible * (parseNum(u.costSharePct)/100);
+
+    for(const u of units){
+      const alloc=eligibleByUnit(u);
+      const self=!!u.selfUse;
+      const wantsInc = self && u.wantsIncomeBonus && (parseNum(u.incomeZVE) <= incThr) && (v==="458_self"); // self variant only
+      const wantsSpeed = self && u.wantsSpeedBonus && isFossil(oldSystem) && (oldAge>=20) && (speedP>0) && (v==="458_self");
+      if(v==="458_landlord" && (u.wantsIncomeBonus || u.wantsSpeedBonus)){
+        checks.push({t:`WE ${u.id}: In Variante „Vermieter/nicht selbstnutzend“ werden Klima-/Einkommensbonus nicht angesetzt.`,lvl:"muted"});
+      }
+      const add = (wantsInc?pInc:0) + (wantsSpeed?speedP:0);
+      const unitRateRaw = baseRate + add;
+      const unitRate = Math.min(unitRateRaw, pMax);
+
+      const unitGrant = alloc * unitRate/100;
+      const unitBaseGrant = alloc * baseRate/100;
+      const unitBonus = unitGrant - unitBaseGrant;
+
+      bonusGrant += unitBonus;
+
+      // conservative slices for display
+      if(wantsInc) incomeGrant += alloc * Math.max(0, Math.min(pInc, pMax - baseRate - (wantsSpeed?speedP:0)))/100;
+      if(wantsSpeed) speedGrant += alloc * Math.max(0, Math.min(speedP, pMax - baseRate - (wantsInc?pInc:0)))/100;
+
+      if(u.wantsIncomeBonus && !self) checks.push({t:`WE ${u.id}: Einkommensbonus gewählt, aber keine Selbstnutzung.`,lvl:"warn"});
+      if(u.wantsIncomeBonus && self && parseNum(u.incomeZVE) > incThr) checks.push({t:`WE ${u.id}: zvE (${eur(parseNum(u.incomeZVE))}) über Schwelle (${eur(incThr)}): Einkommensbonus entfällt.`,lvl:"warn"});
+      if(u.wantsSpeedBonus && !self) checks.push({t:`WE ${u.id}: Klimabonus gewählt, aber keine Selbstnutzung.`,lvl:"warn"});
+
+      unitRows.push({id:u.id, owner:u.ownerName||`Eigentümer ${u.id}`, share:parseNum(u.costSharePct), rate:unitRate, grant:unitGrant});
+    }
+
+    let grantTotal=baseGrant + bonusGrant;
+    const maxGrant = eligible * pMax/100;
+    if(grantTotal > maxGrant){ grantTotal = maxGrant; checks.push({t:`Gesamtzuschuss wurde auf ${pMax} % gedeckelt.`,lvl:"warn"}); }
+
+    const rateTotal = eligible>0 ? grantTotal/eligible*100 : 0;
+
+    const breakdown=[
+      {name:"Grundförderung", rate:pBase, grant:eligible*pBase/100},
+      {name:"Effizienzbonus", rate:(effEligible?pEff:0), grant:eligible*(effEligible?pEff:0)/100},
+      {name:"Klimabonus (geschätzt)", rate:(v==="458_self"?speedP:0), grant:(v==="458_self"?speedGrant:0)},
+      {name:"Einkommensbonus (geschätzt)", rate:(v==="458_self"?pInc:0), grant:(v==="458_self"?incomeGrant:0)},
+      {name:"Deckelung / Korrektur", rate:0, grant:grantTotal - (eligible*pBase/100 + eligible*(effEligible?pEff:0)/100 + (v==="458_self"?speedGrant:0) + (v==="458_self"?incomeGrant:0))}
+    ];
+
+    return { program:"458", eligible, cap, grantTotal, rateTotal, breakdown, unitRows, checks, effEligible };
+  }
+
+  // 522 / 422 (NGF-based)
+  const is522 = (v==="522_company");
+  const pBase = parseNum(is522 ? $("pBase522").value : $("pBase422").value);
+  const pEff  = parseNum(is522 ? $("pEff522").value  : $("pEff422").value);
+  const pMax  = parseNum(is522 ? $("pMax522").value  : $("pMax422").value);
+
+  const ngfTotal=parseNum($("ngfTotal").value);
+  let cap = capNgf(is522 ? $("ngfCapParams522").value : $("ngfCapParams422").value, ngfTotal);
+
+  // scope
+  const scope=$("ngfScope").value;
+  if(scope==="part"){
+    const aff=parseNum($("ngfAffected").value);
+    const ratio = (ngfTotal>0) ? clamp(aff/ngfTotal, 0, 1) : 0;
+    cap = cap * ratio;
+    checks.push({t:`Teilfläche: Förderhöchstbetrag wird anteilig angesetzt (Betroffen: ${NF.format(aff)} m² von ${NF.format(ngfTotal)} m²).`,lvl:"muted"});
+  }
+
+  const eligible=Math.min(totalCost, cap);
+  if(totalCost>cap) checks.push({t:`Kosten liegen über dem Förderhöchstbetrag (${eur(cap)}). Förderfähige Kosten werden gedeckelt.`,lvl:"warn"});
+
+  const baseRate = pBase + (effEligible?pEff:0);
+  const rate = Math.min(baseRate, pMax);
+  if(baseRate>pMax) checks.push({t:`Fördersatz wurde auf ${pMax} % gedeckelt.`,lvl:"warn"});
+  if(!effEligible) checks.push({t:"Effizienzbonus wird nicht angesetzt (Quelle/ natürliches Kältemittel nicht erfüllt).",lvl:"muted"});
+
+  const grantTotal = eligible * rate/100;
+  const rateTotal = eligible>0 ? grantTotal/eligible*100 : 0;
+
+  const breakdown=[
+    {name:"Grundförderung", rate:pBase, grant:eligible*pBase/100},
+    {name:"Effizienzbonus", rate:(effEligible?pEff:0), grant:eligible*(effEligible?pEff:0)/100},
+    {name:"Deckelung / Korrektur", rate:0, grant:grantTotal - (eligible*pBase/100 + eligible*(effEligible?pEff:0)/100)}
+  ];
+
+  return { program:(is522?"522":"422"), eligible, cap, grantTotal, rateTotal, breakdown, unitRows:[], checks, effEligible };
+}
+
+function recalc(){
+  const v=$("variant").value;
+
+  // show/hide affected NGF field
+  const nonRes = !v.startsWith("458");
+  if(nonRes){
+    $("blockNgfAffected").style.display = ($("ngfScope").value==="part") ? "" : "none";
+  }
+
+  // compute and render
+  const r=calc();
+
+  $("eligibleCostText").textContent = eur(r.eligible);
+  $("eligibleCostMono").textContent = `${NF.format(Math.round(r.eligible))} EUR`;
+  $("grantTotalText").textContent = eur(r.grantTotal);
+  $("grantTotalMono").textContent = `${NF.format(Math.round(r.grantTotal))} EUR`;
+  $("rateText").textContent = pct(r.rateTotal);
+  $("rateMono").textContent = `${r.rateTotal.toFixed(1).replace(".",",")} %`;
+  $("rateBar").style.width = `${clamp(r.rateTotal,0,100)}%`;
+
+  const own=Math.max(0, r.eligible - r.grantTotal);
+  $("ownShareText").textContent = eur(own);
+  $("ownShareMono").textContent = `${NF.format(Math.round(own))} EUR`;
+
+  // breakdown
+  const tb=$("breakdownBody"); tb.innerHTML="";
+  for(const b of r.breakdown){
+    const tr=document.createElement("tr");
+    const rateTxt = (b.name==="Deckelung / Korrektur") ? "" : `${b.rate.toFixed(1).replace(".",",")} %`;
+    tr.innerHTML = `<td>${escapeHtml(b.name)}</td><td class="right muted">${rateTxt}</td><td class="right"><span class="${b.grant<0?'bad':(b.grant>0?'good':'muted')}">${eur(b.grant)}</span></td>`;
+    tb.appendChild(tr);
+  }
+
+  // units output
+  const is458 = v.startsWith("458");
+  $("detailsUnitsOut").style.display = is458 ? "" : "none";
+  if(is458){
+    // ensure shares reflect allocation mode
+    normalizeShares(units);
+    renderUnits();
+    const ub=$("unitBody"); ub.innerHTML="";
+    for(const u of r.unitRows){
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td>${u.id}</td><td>${escapeHtml(u.owner)}</td><td class="right">${u.share.toFixed(0)} %</td><td class="right">${u.rate.toFixed(1).replace(".",",")} %</td><td class="right">${eur(u.grant)}</td>`;
+      ub.appendChild(tr);
+    }
+  } else {
+    $("detailsPartiesOut").style.display = "";
+    const pb=$("partiesBody"); pb.innerHTML="";
+    if(parties.length===0) ensureParties(3);
+    const uniq=parties.map(p=>({name:p.name, share:parseNum(p.sharePct)}));
+    for(const p of uniq){
+      const g = r.grantTotal * (p.share/100);
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td class="right">${p.share.toFixed(0)} %</td><td class="right">${eur(g)}</td>`;
+      pb.appendChild(tr);
+    }
+  }
+
+  // checks
+  const ul=$("checks"); ul.innerHTML="";
+  const seen=new Set();
+  for(const c of r.checks){
+    if(seen.has(c.t)) continue; seen.add(c.t);
+    const li=document.createElement("li");
+    li.className = c.lvl==="warn"?"warn":(c.lvl==="bad"?"bad":"muted");
+    li.textContent=c.t;
+    ul.appendChild(li);
+  }
+}
+
+function loadDefaults(){
+  $("appDate").value = todayISO();
+  $("speedSchedule458").value = JSON.stringify(speedScheduleDefault, null, 2);
+  $("criteriaNotes").value = criteriaDefault;
+  $("ngfCapParams522").value = JSON.stringify(ngfCapDefault, null, 2);
+  $("ngfCapParams422").value = JSON.stringify(ngfCapDefault, null, 2);
+
+  ensureUnits(parseNum($("unitsCount").value));
+  $("allocMode").value = "equal";
+  renderUnits();
+  ensureParties(3);
+  renderParties();
+
+  setPills();
+  recalc();
+}
+
+function currentState(){
+  return {
+    v:"2025-12-all",
+    variant:$("variant").value,
+    buildingType:$("buildingType").value,
+    unitsCount:$("unitsCount").value,
+    totalCost:$("totalCost").value,
+    hpType:$("hpType").value,
+    naturalRefrigerant:$("naturalRefrigerant").value,
+    oldSystem:$("oldSystem").value,
+    oldAge:$("oldAge").value,
+    appDate:$("appDate").value,
+    allocMode:$("allocMode").value,
+    multiGen:$("multiGen").value,
+    projectName:$("projectName").value,
+    clientName:$("clientName").value,
+    ngfTotal:$("ngfTotal").value,
+    ngfScope:$("ngfScope").value,
+    ngfAffected:$("ngfAffected").value,
+    preset:$("preset").value,
+    params:{
+      pMax:$("pMax").value,
+      // 458
+      pBase458:$("pBase458").value, pEff458:$("pEff458").value, pInc458:$("pInc458").value, incThreshold458:$("incThreshold458").value,
+      speedSchedule458:$("speedSchedule458").value, cap1_458:$("cap1_458").value, cap2to6_458:$("cap2to6_458").value, capUnitsMax_458:$("capUnitsMax_458").value,
+      // 522
+      pBase522:$("pBase522").value, pEff522:$("pEff522").value, pMax522:$("pMax522").value, bioBonus522:$("bioBonus522").value, ngfCapParams522:$("ngfCapParams522").value,
+      // 422
+      pBase422:$("pBase422").value, pEff422:$("pEff422").value, pMax422:$("pMax422").value, bioBonus422:$("bioBonus422").value, ngfCapParams422:$("ngfCapParams422").value,
+      criteriaNotes:$("criteriaNotes").value
+    },
+    units, parties
+  };
+}
+
+function applyState(s){
+  if(!s) return;
+  $("variant").value = s.variant ?? "458_self";
+  $("buildingType").value = s.buildingType ?? "EFH";
+  $("unitsCount").value = s.unitsCount ?? "1";
+  $("totalCost").value = s.totalCost ?? "35000";
+  $("hpType").value = s.hpType ?? "AIR";
+  $("naturalRefrigerant").value = s.naturalRefrigerant ?? "no";
+  $("oldSystem").value = s.oldSystem ?? "gas";
+  $("oldAge").value = s.oldAge ?? "22";
+  $("appDate").value = s.appDate ?? todayISO();
+  $("allocMode").value = s.allocMode ?? "equal";
+  $("multiGen").value = s.multiGen ?? "no";
+  $("projectName").value = s.projectName ?? "Projekt Wärmepumpe";
+  $("clientName").value = s.clientName ?? "Kunde";
+  $("ngfTotal").value = s.ngfTotal ?? "300";
+  $("ngfScope").value = s.ngfScope ?? "all";
+  $("ngfAffected").value = s.ngfAffected ?? "300";
+  $("preset").value = s.preset ?? "auto";
+
+  const p=s.params ?? {};
+  $("pMax").value = p.pMax ?? "70";
+  $("pBase458").value = p.pBase458 ?? "30";
+  $("pEff458").value = p.pEff458 ?? "5";
+  $("pInc458").value = p.pInc458 ?? "30";
+  $("incThreshold458").value = p.incThreshold458 ?? "40000";
+  $("speedSchedule458").value = p.speedSchedule458 ?? JSON.stringify(speedScheduleDefault,null,2);
+  $("cap1_458").value = p.cap1_458 ?? "30000";
+  $("cap2to6_458").value = p.cap2to6_458 ?? "15000";
+  $("capUnitsMax_458").value = p.capUnitsMax_458 ?? "6";
+
+  $("pBase522").value = p.pBase522 ?? "30";
+  $("pEff522").value = p.pEff522 ?? "5";
+  $("pMax522").value = p.pMax522 ?? "35";
+  $("bioBonus522").value = p.bioBonus522 ?? "2500";
+  $("ngfCapParams522").value = p.ngfCapParams522 ?? JSON.stringify(ngfCapDefault,null,2);
+
+  $("pBase422").value = p.pBase422 ?? "30";
+  $("pEff422").value = p.pEff422 ?? "5";
+  $("pMax422").value = p.pMax422 ?? "35";
+  $("bioBonus422").value = p.bioBonus422 ?? "2500";
+  $("ngfCapParams422").value = p.ngfCapParams422 ?? JSON.stringify(ngfCapDefault,null,2);
+
+  $("criteriaNotes").value = p.criteriaNotes ?? criteriaDefault;
+
+  units = Array.isArray(s.units) ? s.units : [];
+  parties = Array.isArray(s.parties) ? s.parties : [];
+
+  ensureUnits(parseNum($("unitsCount").value));
+  ensureParties(Math.max(1, parties.length||3));
+  renderUnits();
+  renderParties();
+
+  switchUI();
+}
+
+function downloadJSON(filename, obj){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+function uploadJSON(){
+  return new Promise((resolve)=>{
+    const inp=document.createElement("input");
+    inp.type="file"; inp.accept=".json,application/json";
+    inp.onchange=()=>{
+      const file=inp.files?.[0];
+      if(!file) return resolve(null);
+      const r=new FileReader();
+      r.onload=()=>{ try{ resolve(JSON.parse(r.result)); }catch(e){ alert("Datei ist kein gültiges JSON."); resolve(null); } };
+      r.readAsText(file);
+    };
+    inp.click();
+  });
+}
+
+// ===== PDF report generator (new window + print) =====
+function buildReportHTML(state, result){
+  const v=state.variant;
+  const is458=v.startsWith("458");
+  const program = result.program;
+  const title = `Förderbericht – Wärmepumpe (${program})`;
+  const now = new Date();
+  const stamp = now.toLocaleString("de-DE");
+  const lines = (state.params?.criteriaNotes || "").split("\n").map(x=>x.trim()).filter(Boolean);
+
+  const rowsBreak = result.breakdown.map(b=>`
+    <tr>
+      <td>${escapeHtml(b.name)}</td>
+      <td style="text-align:right;color:#444">${b.name==="Deckelung / Korrektur" ? "" : (b.rate.toFixed(1).replace(".",",")+" %")}</td>
+      <td style="text-align:right">${eur(b.grant)}</td>
+    </tr>
+  `).join("");
+
+  const rowsUnits = is458 ? (result.unitRows.map(u=>`
+    <tr><td>${u.id}</td><td>${escapeHtml(u.owner)}</td><td style="text-align:right">${u.share.toFixed(0)} %</td><td style="text-align:right">${u.rate.toFixed(1).replace(".",",")} %</td><td style="text-align:right">${eur(u.grant)}</td></tr>
+  `).join("")) : "";
+
+  const rowsParties = (!is458 ? (parties.map(p=>{
+    const share=parseNum(p.sharePct);
+    const g = result.grantTotal * (share/100);
+    return `<tr><td>${escapeHtml(p.name)}</td><td style="text-align:right">${share.toFixed(0)} %</td><td style="text-align:right">${eur(g)}</td></tr>`;
+  }).join("")) : "");
+
+  const checks = result.checks.map(c=>`<li>${escapeHtml(c.t)}</li>`).join("");
+
+  const scopeText = (!is458 && state.ngfScope==="part") ? `Teilfläche: ${NF.format(parseNum(state.ngfAffected))} m² von ${NF.format(parseNum(state.ngfTotal))} m²` : (is458 ? "" : "Gesamte NGF");
+
+  return `<!doctype html>
+<html lang="de"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escapeHtml(title)}</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:28px;color:#111}
+h1{margin:0 0 6px;font-size:20px}
+.small{color:#444;font-size:12px;line-height:1.35}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.card{border:1px solid #ddd;border-radius:12px;padding:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px 8px;border-bottom:1px solid #eee;vertical-align:top}
+th{text-align:left;color:#444}
+hr{border:none;border-top:1px solid #ddd;margin:14px 0}
+@media print{button{display:none}}
+</style></head>
+<body>
+<button onclick="window.print()">Drucken / als PDF speichern</button>
+<h1>${escapeHtml(title)}</h1>
+<div class="small">Erstellt: ${escapeHtml(stamp)}<br/>Projekt: ${escapeHtml(state.projectName || "")} · Kunde/Label: ${escapeHtml(state.clientName || "")} · Variante: ${escapeHtml(state.variant)}</div>
+
+<div class="grid">
+  <div class="card">
+    <b>Eingaben</b><hr/>
+    <div class="small">
+      Gesamtkosten (brutto): <b>${eur(parseNum(state.totalCost))}</b><br/>
+      Wärmepumpe/Wärmequelle: <b>${escapeHtml(state.hpType)}</b> · Natürliches Kältemittel: <b>${escapeHtml(state.naturalRefrigerant)}</b><br/>
+      ${is458 ? (`Gebäudetyp: <b>${escapeHtml(state.buildingType)}</b> · Wohneinheiten: <b>${escapeHtml(state.unitsCount)}</b><br/>
+      Altanlage: <b>${escapeHtml(state.oldSystem)}</b> · Alter: <b>${escapeHtml(state.oldAge)}</b> Jahre · Antragsdatum: <b>${escapeHtml(state.appDate || "")}</b><br/>
+      Kostenverteilung: <b>${escapeHtml(state.allocMode || "manual")}</b><br/>`)
+      : (`NGF gesamt: <b>${NF.format(parseNum(state.ngfTotal))} m²</b> · ${escapeHtml(scopeText)}<br/>`)}
+      Hybrid/Kaskade: <b>${escapeHtml(state.multiGen)}</b>
+    </div>
+  </div>
+  <div class="card">
+    <b>Ergebnis</b><hr/>
+    <div class="small">
+      Förderfähige Kosten (gedeckelt): <b>${eur(result.eligible)}</b><br/>
+      Zuschuss gesamt: <b>${eur(result.grantTotal)}</b><br/>
+      Effektive Förderquote: <b>${result.rateTotal.toFixed(1).replace(".",",")} %</b><br/>
+      Eigenanteil (auf förderfähige Kosten): <b>${eur(Math.max(0, result.eligible - result.grantTotal))}</b>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <b>Aufschlüsselung</b><hr/>
+  <table>
+    <thead><tr><th>Komponente</th><th style="text-align:right">Satz</th><th style="text-align:right">Zuschuss</th></tr></thead>
+    <tbody>${rowsBreak}</tbody>
+  </table>
+</div>
+
+${is458 ? `
+<div class="card" style="margin-top:16px">
+  <b>Wohneinheiten / Eigentümer (Schätzung)</b><hr/>
+  <table>
+    <thead><tr><th>WE</th><th>Eigentümer</th><th style="text-align:right">Kostenanteil</th><th style="text-align:right">Satz</th><th style="text-align:right">Zuschuss</th></tr></thead>
+    <tbody>${rowsUnits}</tbody>
+  </table>
+</div>` : `
+<div class="card" style="margin-top:16px">
+  <b>Antragsteller / Kostenaufteilung (nur Bericht)</b><hr/>
+  <table>
+    <thead><tr><th>Partei</th><th style="text-align:right">Kostenanteil</th><th style="text-align:right">Zuschuss (anteilig)</th></tr></thead>
+    <tbody>${rowsParties}</tbody>
+  </table>
+</div>`}
+
+<div class="card" style="margin-top:16px">
+  <b>Hinweise & Plausibilitätschecks</b><hr/>
+  <ul class="small">${checks || "<li>Keine</li>"}</ul>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <b>Rechtlicher Hinweis</b><hr/>
+  <div class="small">
+    Indikative Berechnung. Maßgeblich sind Merkblatt/Richtlinie/FAQ und die Angaben in der Bestätigung zum Antrag (BzA/gBzA).<br/>
+    ${lines.map(l=>escapeHtml(l)).join("<br/>")}
+  </div>
+</div>
+</body></html>`;
+}
+
+function openReport(){
+  const state=currentState();
+  const result=calc();
+  const html=buildReportHTML(state, result);
+  const w=window.open("", "_blank");
+  if(!w){ alert("Pop‑up blockiert. Bitte Pop‑ups erlauben oder über „Drucken“ speichern."); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+
+function applyHintsState(on){
+  document.body.classList.toggle("showHints", !!on);
+  try{ localStorage.setItem("foerderrechner_showHints", on ? "1" : "0"); }catch(e){}
+}
+function initHintsToggle(){
+  let on = false;
+  try{ on = (localStorage.getItem("foerderrechner_showHints") === "1"); }catch(e){}
+  applyHintsState(on);
+  const t = $("toggleHints");
+  if(!t) return;
+  const flip = ()=>applyHintsState(!document.body.classList.contains("showHints"));
+  t.addEventListener("click", flip);
+  t.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); }});
+}
+
+function bind(){
+  [
+    "variant","buildingType","unitsCount","totalCost","hpType","naturalRefrigerant","oldSystem","oldAge","appDate","multiGen","allocMode",
+    "projectName","clientName","ngfTotal","ngfScope","ngfAffected",
+    "preset","pMax",
+    "pBase458","pEff458","pInc458","incThreshold458","speedSchedule458","cap1_458","cap2to6_458","capUnitsMax_458",
+    "pBase522","pEff522","pMax522","bioBonus522","ngfCapParams522",
+    "pBase422","pEff422","pMax422","bioBonus422","ngfCapParams422",
+    "criteriaNotes"
+  ].forEach(id=>{
+    $(id).addEventListener("input", ()=>{
+      if(id==="variant"){ switchUI(); return; }
+      if(id==="ngfScope"){ recalc(); return; }
+      if(id==="preset"){ applyPreset(); recalc(); return; }
+      if(id==="buildingType" && $("buildingType").value==="EFH") $("unitsCount").value="1";
+      recalc();
+    });
+  });
+
+
+  // Allocation mode (458): enforce equal shares or allow manual shares
+  $("allocMode").addEventListener("input", ()=>{
+    const v = $("variant").value;
+    if(v.startsWith("458")){
+      // re-normalize shares based on mode
+      normalizeShares(units);
+      renderUnits();
+      recalc();
+    }
+  });
+  $("btnEqualize").addEventListener("click", ()=>{
+    const v = $("variant").value;
+    if(!v.startsWith("458")) return;
+    // Set equal shares regardless of current mode
+    const n = parseNum($("unitsCount").value);
+    ensureUnits(n);
+    const eq = 100/n;
+    units.forEach(u=>u.costSharePct = eq);
+    normalizeShares(units);
+    renderUnits();
+    recalc();
+  });
+  $("btnExport").addEventListener("click", ()=>window.print());
+  $("btnPdf").addEventListener("click", openReport);
+
+  $("btnSave").addEventListener("click", ()=>{
+    const s=currentState();
+    downloadJSON(`foerderrechner_wp_${todayISO()}.json`, s);
+    try{ localStorage.setItem("foerderrechner_wp_last", JSON.stringify(s)); }catch(e){}
+  });
+
+  $("btnLoad").addEventListener("click", async ()=>{
+    const fromLocal = localStorage.getItem("foerderrechner_wp_last");
+    const useLocal = fromLocal && confirm("Letzten gespeicherten Stand aus diesem Browser laden? (Abbrechen = JSON-Datei auswählen)");
+    if(useLocal){ applyState(JSON.parse(fromLocal)); return; }
+    const s = await uploadJSON();
+    if(s) applyState(s);
+  });
+
+  $("btnReset").addEventListener("click", ()=>{ if(confirm("Wirklich alles zurücksetzen?")) location.reload(); });
+
+  // Non-res parties: quick control: add/remove via keyboard (optional)
+}
+
+loadDefaults();
+initHintsToggle();
+switchUI();
+bind();
+</script>
+</body>
+</html>
